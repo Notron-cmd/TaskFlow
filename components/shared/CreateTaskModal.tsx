@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { createTask } from '@/lib/actions/tasks'
 import { createClient } from '@/lib/supabase/client'
-import { X, Loader2, AlertCircle } from 'lucide-react'
+import { addReminder } from '@/lib/actions/reminders'
+import { X, Loader2, AlertCircle, Calendar } from 'lucide-react'
 import { useTaskStore } from '@/stores/taskStore'
+import { ReminderManager, type ReminderConfig } from './ReminderManager'
 
 type Priority = 'low' | 'medium' | 'high' | 'urgent'
 
@@ -20,6 +22,8 @@ export function CreateTaskModal() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
+  const [dueDate, setDueDate] = useState<string>('')
+  const [reminders, setReminders] = useState<ReminderConfig[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [workspaceId, setWorkspaceId] = useState<string | null>(null)
@@ -68,6 +72,17 @@ export function CreateTaskModal() {
     setIsLoading(true)
 
     try {
+      // Convert due date to ISO format, accounting for local timezone
+      let dueDateISO: string | undefined
+      if (dueDate) {
+        const date = new Date(dueDate)
+        // Get timezone offset in milliseconds
+        const timezoneOffset = new Date().getTimezoneOffset() * 60000
+        // Adjust the date to account for timezone
+        const adjustedDate = new Date(date.getTime() - timezoneOffset)
+        dueDateISO = adjustedDate.toISOString()
+      }
+
       const newTask = await createTask({
         workspace_id: workspaceId,
         title: title.trim(),
@@ -76,7 +91,50 @@ export function CreateTaskModal() {
         status: 'todo',
         tags: [],
         position: 0,
+        due_date: dueDateISO,
       })
+
+      // If reminders are set, add them to the task's calendar event
+      if (reminders.length > 0) {
+        // If no calendar event was auto-created via trigger, create it manually
+        let eventId: string | null = newTask.calendar_event_id ?? null
+        
+        if (!eventId && dueDateISO) {
+          try {
+            const endAt = new Date(new Date(dueDateISO).getTime() + 3600000).toISOString()
+            const { data: event } = await supabase
+              .from('calendar_events')
+              .insert({
+                title: title.trim(),
+                description: description.trim() || undefined,
+                start_at: dueDateISO,
+                end_at: endAt,
+                linked_task_id: newTask.id,
+                workspace_id: workspaceId,
+                created_by: (await supabase.auth.getUser()).data.user?.id || '',
+                type: 'task_due',
+              })
+              .select()
+              .single()
+            
+            eventId = event?.id ?? null
+          } catch (eventErr) {
+            console.error('Failed to create calendar event:', eventErr)
+          }
+        }
+
+        // Add reminders to the calendar event
+        if (eventId) {
+          try {
+            for (const reminder of reminders) {
+              await addReminder(eventId, reminder.minutesBefore, reminder.channel)
+            }
+          } catch (reminderErr) {
+            console.error('Failed to add reminders:', reminderErr)
+            // Don't fail the whole operation if reminders fail
+          }
+        }
+      }
 
       upsertTask(newTask)
       handleClose()
@@ -91,6 +149,8 @@ export function CreateTaskModal() {
     setTitle('')
     setDescription('')
     setPriority('medium')
+    setDueDate('')
+    setReminders([])
     setError(null)
     closeCreateModal()
   }
@@ -99,9 +159,9 @@ export function CreateTaskModal() {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#16162A] border border-white/[0.06] rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-[#16162A] border border-white/[0.06] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.06] sticky top-0 bg-[#16162A]">
           <h2 className="text-lg font-semibold text-white">Create new task</h2>
           <button
             onClick={handleClose}
@@ -177,8 +237,34 @@ export function CreateTaskModal() {
             </div>
           </div>
 
+          {/* Due Date Input */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
+              <Calendar size={16} />
+              Due date (optional)
+            </label>
+            <input
+              type="datetime-local"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              disabled={isLoading}
+              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all disabled:opacity-50"
+            />
+          </div>
+
+          {/* Reminder Manager */}
+          {dueDate && (
+            <div className="pt-2 border-t border-white/[0.08]">
+              <ReminderManager
+                reminders={reminders}
+                onAdd={(reminder) => setReminders([...reminders, reminder])}
+                onRemove={(index) => setReminders(reminders.filter((_, i) => i !== index))}
+              />
+            </div>
+          )}
+
           {/* Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 border-t border-white/[0.08]">
             <button
               type="button"
               onClick={handleClose}

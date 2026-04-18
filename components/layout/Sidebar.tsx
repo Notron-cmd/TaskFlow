@@ -54,12 +54,12 @@ export function Sidebar({ user }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-56 z-30 bg-[#0D0D1C] border-r border-white/[0.05] flex flex-col">
+    <aside className="fixed left-0 top-0 h-screen w-56 z-30 bg-gray-50 dark:bg-[#0D0D1C] border-r border-gray-200 dark:border-white/[0.05] flex flex-col">
       {/* Top Section */}
       <div className="px-3 py-5">
         <div className="flex items-center gap-2 px-2 mb-6">
           <Kanban className="size-5 text-indigo-400" />
-          <span className="font-display text-lg font-bold text-white">
+          <span className="font-display text-lg font-bold text-black dark:text-white">
             TaskFlow
           </span>
         </div>
@@ -78,8 +78,8 @@ export function Sidebar({ user }: SidebarProps) {
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 w-full ${
                 isActive
-                  ? 'bg-indigo-500/15 text-indigo-300 border-r-2 border-indigo-500 font-medium'
-                  : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+                  ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border-r-2 border-indigo-500 font-medium'
+                  : 'text-gray-600 dark:text-slate-500 hover:text-gray-800 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/[0.04]'
               }`}
             >
               <Icon className="size-4" />
@@ -90,8 +90,8 @@ export function Sidebar({ user }: SidebarProps) {
       </nav>
 
       {/* Bottom Section */}
-      <div className="p-3 border-t border-white/[0.05]">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer group">
+      <div className="p-3 border-t border-gray-200 dark:border-white/[0.05]">
+        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/[0.04] cursor-pointer group">
           {user.user_metadata?.avatar_url ? (
             <img
               src={user.user_metadata.avatar_url}
@@ -99,22 +99,22 @@ export function Sidebar({ user }: SidebarProps) {
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-indigo-500/30 flex items-center justify-center text-xs font-bold text-white">
+            <div className="w-8 h-8 rounded-full bg-indigo-500/30 flex items-center justify-center text-xs font-bold text-white dark:text-white">
               {initials}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-slate-300 font-medium truncate">
+            <p className="text-sm text-gray-800 dark:text-slate-300 font-medium truncate">
               {displayName}
             </p>
-            <p className="text-xs text-slate-600 truncate">{user.email}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-600 truncate">{user.email}</p>
           </div>
-          <ChevronUp className="size-3 text-slate-600" />
+          <ChevronUp className="size-3 text-gray-400 dark:text-slate-600" />
         </div>
 
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:text-rose-400 hover:bg-rose-500/[0.08] rounded-lg transition-all duration-150 w-full mt-1"
+          className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/[0.08] rounded-lg transition-all duration-150 w-full mt-1"
         >
           <LogOut className="size-4" />
           <span>Sign out</span>

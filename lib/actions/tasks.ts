@@ -128,15 +128,25 @@ export async function setTaskDueDate(
     throw new Error('Unauthorized')
   }
 
-  const { data, error } = await supabase
+  // First, update the due_date (trigger will fire here)
+  const { error: updateError } = await supabase
     .from('tasks')
     .update({ due_date: dueDate?.toISOString() ?? null })
     .eq('id', taskId)
+
+  if (updateError) {
+    throw new Error(updateError.message)
+  }
+
+  // Then, fetch the updated task separately to avoid trigger conflicts
+  const { data, error: fetchError } = await supabase
+    .from('tasks')
     .select('id, due_date, calendar_event_id')
+    .eq('id', taskId)
     .single()
 
-  if (error) {
-    throw new Error(error.message)
+  if (fetchError) {
+    throw new Error(fetchError.message)
   }
 
   revalidatePath('/board')
@@ -180,52 +190,4 @@ export async function assignTask(
   }
 
   revalidatePath('/board')
-}
-
-export async function addReminder(
-  taskId: string,
-  minutesBefore: number,
-  channel: 'in_app' | 'email' | 'push'
-) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Unauthorized')
-  }
-
-  const { data, error } = await supabase.from('reminders').insert({
-    event_id: taskId,
-    user_id: user.id,
-    minutes_before: minutesBefore,
-    channel,
-  }).select().single()
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return data
-}
-
-export async function deleteReminder(reminderId: string) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Unauthorized')
-  }
-
-  const { error } = await supabase
-    .from('reminders')
-    .delete()
-    .eq('id', reminderId)
-
-  if (error) {
-    throw new Error(error.message)
-  }
 }

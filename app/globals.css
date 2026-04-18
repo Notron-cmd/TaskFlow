@@ -2,22 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light Mode Colors */
 :root {
+  /* Background colors */
+  --color-bg-base: 255 255 255;
+  --color-bg-card: 245 245 245;
+  --color-bg-elevated: 240 240 240;
+
+  /* Surface colors */
+  --color-surface-base: 255 255 255;
+  --color-surface-card: 245 245 245;
+  --color-surface-elevated: 240 240 240;
+
+  /* Text colors */
+  --color-text-primary: 0 0 0;
+  --color-text-secondary: 100 116 139;
+
+  /* Border colors */
+  --color-border: 203 213 225;
+
+  /* CSS variables for compatibility */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
 }
 
+/* Dark Mode Colors */
+:root.dark {
+  /* Background colors */
+  --color-bg-base: 15 15 26;
+  --color-bg-card: 22 22 42;
+  --color-bg-elevated: 30 30 53;
+
+  /* Surface colors */
+  --color-surface-base: 15 15 26;
+  --color-surface-card: 22 22 42;
+  --color-surface-elevated: 30 30 53;
+
+  /* Text colors */
+  --color-text-primary: 255 255 255;
+  --color-text-secondary: 148 163 184;
+
+  /* Border colors */
+  --color-border: 51 65 85;
+
+  /* CSS variables for compatibility */
+  --background: #0F0F1A;
+  --foreground: #ffffff;
+}
+
+/* System preference fallback when not explicitly set */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.dark):not(.light) {
+    /* Background colors */
+    --color-bg-base: 15 15 26;
+    --color-bg-card: 22 22 42;
+    --color-bg-elevated: 30 30 53;
+
+    /* Surface colors */
+    --color-surface-base: 15 15 26;
+    --color-surface-card: 22 22 42;
+    --color-surface-elevated: 30 30 53;
+
+    /* Text colors */
+    --color-text-primary: 255 255 255;
+    --color-text-secondary: 148 163 184;
+
+    /* Border colors */
+    --color-border: 51 65 85;
+
+    --background: #0F0F1A;
+    --foreground: #ffffff;
   }
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not(.dark):not(.light) {
+    /* Light mode already set as default */
+  }
+}
+
+/* Apply color-scheme property */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer utilities {

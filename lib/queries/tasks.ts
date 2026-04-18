@@ -14,11 +14,6 @@ export async function getTasksWithAssignees(workspaceId: string) {
           full_name,
           avatar_url
         )
-      ),
-      calendar_events (
-        id,
-        start_at,
-        type
       )`
     )
     .eq("workspace_id", workspaceId)
@@ -85,13 +80,6 @@ export async function getTaskById(taskId: string) {
         mime_type,
         storage_path,
         created_at
-      ),
-      calendar_events (
-        id,
-        title,
-        start_at,
-        end_at,
-        type
       )`
     )
     .eq("id", taskId)

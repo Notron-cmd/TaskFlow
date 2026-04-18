@@ -27,11 +27,11 @@ export default async function AppLayout({
 
   return (
     <DrawerProvider>
-      <div className="flex h-screen bg-[#0F0F1A] overflow-hidden">
+      <div className="flex h-screen bg-white dark:bg-[#0F0F1A] overflow-hidden">
         <Sidebar user={userData} />
         <div className="flex flex-col flex-1 overflow-hidden">
           <Topbar user={userData} />
-          <main className="flex-1 overflow-auto p-6 mt-14 ml-56">
+          <main className="flex-1 overflow-auto p-6 mt-14 ml-56 bg-white dark:bg-[#0F0F1A]">
             {children}
           </main>
         </div>

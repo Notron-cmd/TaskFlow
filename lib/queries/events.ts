@@ -14,12 +14,6 @@ export async function getEventsForMonth(
     .from("calendar_events")
     .select(
       `*,
-      tasks (
-        id,
-        title,
-        status,
-        priority
-      ),
       reminders (
         id,
         minutes_before,
@@ -47,7 +41,7 @@ export async function getUpcomingEvents(workspaceId: string) {
 
   const { data, error } = await supabase
     .from("calendar_events")
-    .select(`*, tasks(id, status, priority)`)
+    .select("*")
     .eq("workspace_id", workspaceId)
     .gte("start_at", now.toISOString())
     .lte("start_at", nextWeek.toISOString())
@@ -68,12 +62,6 @@ export async function getEventById(eventId: string) {
     .from("calendar_events")
     .select(
       `*,
-      tasks (
-        id,
-        title,
-        status,
-        priority
-      ),
       reminders (
         id,
         minutes_before,
