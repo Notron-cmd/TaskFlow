@@ -30,7 +30,7 @@ interface SettingItemProps {
 
 function SettingItem({ label, description, icon, children }: SettingItemProps) {
   return (
-    <div className="flex items-start justify-between py-3 px-3 rounded-lg bg-gray-200 dark:bg-slate-900/50 hover:bg-gray-300 dark:hover:bg-slate-900 transition-colors">
+    <div className="flex items-start justify-between py-3 px-3 rounded-lg bg-gray-200 dark:bg-slate-900/50 hover:bg-gray-300 dark:hover:bg-slate-900 transition-smooth">
       <div className="flex items-start gap-3 flex-1">
         {icon && <div className="text-gray-600 dark:text-slate-400 mt-1">{icon}</div>}
         <div>
@@ -47,12 +47,12 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boole
   return (
     <button
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-smooth ${
         checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-slate-700'
       }`}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-smooth ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />
@@ -73,7 +73,7 @@ function Select({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="px-3 py-2 rounded-lg bg-gray-200 dark:bg-slate-800 text-black dark:text-white border border-gray-400 dark:border-slate-700 hover:border-gray-500 dark:hover:border-slate-600 transition-colors cursor-pointer text-sm"
+      className="px-3 py-2 rounded-lg bg-gray-200 dark:bg-slate-800 text-black dark:text-white border border-gray-400 dark:border-slate-700 hover:border-gray-500 dark:hover:border-slate-600 transition-smooth cursor-pointer text-sm"
     >
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -106,15 +106,15 @@ export default function SettingsPage() {
   } = useSettingsStore()
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 animate-slide-in-down">
         <h1 className="text-3xl font-bold text-black dark:text-white mb-2">Settings</h1>
         <p className="text-gray-600 dark:text-slate-400">Manage your preferences and account settings</p>
       </div>
 
       {/* Settings Card */}
-      <div className="bg-gray-100 dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-xl p-6 space-y-8">
+      <div className="bg-gray-100 dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-xl p-6 space-y-8 animate-scale-in">
         {/* Theme Section */}
         <SettingSection title="Appearance" description="Customize how TaskFlow looks">
           <SettingItem label="Theme" description="Choose your preferred color scheme" icon={<Sun size={16} />}>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                 resetSettings()
               }
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 dark:bg-slate-900 hover:bg-gray-300 dark:hover:bg-slate-800 text-gray-800 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 dark:bg-slate-900 hover:bg-gray-300 dark:hover:bg-slate-800 text-gray-800 dark:text-slate-300 hover:text-black dark:hover:text-white transition-smooth active:scale-95"
           >
             <RotateCcw size={16} />
             <span>Reset All Settings</span>

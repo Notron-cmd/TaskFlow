@@ -57,30 +57,32 @@ export function KanbanColumn({
   const taskCount = tasks.length
 
   return (
-    <div ref={setNodeRef} className="w-80 flex-shrink-0 flex flex-col">
+    <div ref={setNodeRef} className="w-full md:w-80 md:flex-shrink-0 flex flex-col px-2 md:px-0" style={{
+      animation: id === 'todo' ? 'slideInLeft 0.5s ease-out' : id === 'in_progress' ? 'slideInUp 0.5s ease-out 100ms both' : 'slideInRight 0.5s ease-out 200ms both'
+    }}>
       <div
-        className="h-[2px] rounded-full mb-3 w-full opacity-60"
+        className="h-[2px] rounded-full mb-2 md:mb-3 w-full opacity-60 transition-smooth"
         style={{ background: config.color }}
       />
 
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-2 md:mb-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <div
             className="w-2 h-2 rounded-full"
             style={{ background: config.color }}
           />
-          <Icon className={`size-3.5 ${config.iconClass}`} />
-          <span className="font-display text-sm font-semibold text-white/80">
+          <Icon className={`size-3 md:size-3.5 ${config.iconClass}`} />
+          <span className="font-display text-xs md:text-sm font-semibold text-white/80">
             {title}
           </span>
-          <div className="bg-white/[0.06] rounded-full px-2 text-xs text-slate-500 font-mono ml-1">
+          <div className="bg-white/[0.06] rounded-full px-1.5 md:px-2 text-[10px] md:text-xs text-slate-500 font-mono">
             {taskCount}
           </div>
         </div>
 
         {wipLimit && taskCount >= wipLimit - 1 && (
           <div
-            className={`text-xs font-mono ${
+            className={`text-[10px] md:text-xs font-mono ${
               taskCount >= wipLimit ? 'text-rose-400' : 'text-amber-400'
             }`}
           >
@@ -90,7 +92,7 @@ export function KanbanColumn({
       </div>
 
       <div
-        className={`flex-1 rounded-2xl p-3 min-h-[500px] space-y-3 transition-all duration-150 ${
+        className={`flex-1 rounded-xl md:rounded-2xl p-2 md:p-3 min-h-[300px] md:min-h-[500px] space-y-2 md:space-y-3 transition-all duration-150 ${
           isOver
             ? 'bg-indigo-500/[0.04] border-2 border-dashed border-indigo-500/40'
             : 'bg-black/20'
@@ -103,11 +105,11 @@ export function KanbanColumn({
             <TaskCardSkeleton />
           </>
         ) : taskCount === 0 ? (
-          <div className="py-12 flex flex-col items-center gap-2">
-            <Inbox className="size-8 text-slate-700" />
-            <p className="text-sm text-slate-600">No tasks yet</p>
+          <div className="py-6 md:py-12 flex flex-col items-center gap-1 md:gap-2">
+            <Inbox className="size-6 md:size-8 text-slate-700" />
+            <p className="text-xs md:text-sm text-slate-600">No tasks yet</p>
             <p
-              className="text-xs text-indigo-400/70 cursor-pointer hover:text-indigo-400 transition-colors"
+              className="text-[11px] md:text-xs text-indigo-400/70 cursor-pointer hover:text-indigo-400 transition-colors"
               onClick={() => onAddTask?.()}
             >
               Add your first task
@@ -118,8 +120,15 @@ export function KanbanColumn({
             items={tasks.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
           >
-            {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} isDragging={false} />
+            {tasks.map((task, idx) => (
+              <div
+                key={task.id}
+                style={{
+                  animation: `slideInUp 0.5s ease-out ${idx * 50}ms both`,
+                }}
+              >
+                <TaskCard task={task} isDragging={false} />
+              </div>
             ))}
           </SortableContext>
         )}

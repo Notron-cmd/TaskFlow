@@ -118,8 +118,8 @@ export default function RemindersPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
+    <div className="p-6 space-y-6 animate-fade-in">
+      <div className="animate-slide-in-down">
         <h1 className="font-display text-3xl font-bold text-white mb-2">
           Reminders
         </h1>
@@ -129,10 +129,13 @@ export default function RemindersPage() {
       </div>
 
       <div className="grid gap-4">
-        {reminders.map((reminder) => (
+        {reminders.map((reminder, idx) => (
           <div
             key={reminder.id}
-            className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors"
+            className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-smooth"
+            style={{
+              animation: `slideInUp 0.4s ease-out ${idx * 50}ms both`,
+            }}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">

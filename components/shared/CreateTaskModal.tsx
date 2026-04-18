@@ -72,15 +72,13 @@ export function CreateTaskModal() {
     setIsLoading(true)
 
     try {
-      // Convert due date to ISO format, accounting for local timezone
+      // Convert due date to ISO format
+      // Note: new Date(dueDate) automatically interprets as local time
+      // and .toISOString() correctly converts to UTC
       let dueDateISO: string | undefined
       if (dueDate) {
         const date = new Date(dueDate)
-        // Get timezone offset in milliseconds
-        const timezoneOffset = new Date().getTimezoneOffset() * 60000
-        // Adjust the date to account for timezone
-        const adjustedDate = new Date(date.getTime() - timezoneOffset)
-        dueDateISO = adjustedDate.toISOString()
+        dueDateISO = date.toISOString()
       }
 
       const newTask = await createTask({
@@ -158,15 +156,15 @@ export function CreateTaskModal() {
   if (!isCreateModalOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#16162A] border border-white/[0.06] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="bg-[#16162A] border border-white/[0.06] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/[0.06] sticky top-0 bg-[#16162A]">
           <h2 className="text-lg font-semibold text-white">Create new task</h2>
           <button
             onClick={handleClose}
             disabled={isLoading}
-            className="p-1 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+            className="p-1 hover:bg-white/10 rounded-lg transition-smooth disabled:opacity-50"
           >
             <X size={20} className="text-slate-400" />
           </button>
@@ -176,7 +174,7 @@ export function CreateTaskModal() {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Error Alert */}
           {error && (
-            <div className="flex items-start gap-3 bg-rose-500/10 border border-rose-500/20 rounded-lg p-3">
+            <div className="flex items-start gap-3 bg-rose-500/10 border border-rose-500/20 rounded-lg p-3 animate-slide-in-down">
               <AlertCircle size={16} className="text-rose-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-rose-300">{error}</p>
             </div>

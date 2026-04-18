@@ -41,8 +41,8 @@ export default async function CalendarPage() {
   const upcomingEvents = await getUpcomingEvents(membership.workspace_id)
 
   return (
-    <div className="flex gap-6 h-full overflow-hidden">
-      <div className="flex-1 overflow-auto">
+    <div className="flex flex-col md:flex-row gap-6 h-full overflow-hidden animate-fade-in">
+      <div className="flex-1 overflow-auto animate-slide-in-left">
         <CalendarGrid
           initialEvents={events}
           year={year}
@@ -50,7 +50,10 @@ export default async function CalendarPage() {
           workspaceId={membership.workspace_id}
         />
       </div>
-      <UpcomingPanel events={upcomingEvents} />
+      {/* UpcomingPanel - hidden on mobile, visible on md+ */}
+      <div className="hidden md:block animate-slide-in-right">
+        <UpcomingPanel events={upcomingEvents} />
+      </div>
     </div>
   )
 }

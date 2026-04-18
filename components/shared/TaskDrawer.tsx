@@ -10,6 +10,7 @@ import {
   addReminder,
   deleteReminder,
 } from '@/lib/actions/tasks'
+import { formatUtcForDatetimeLocal } from '@/lib/utils/datetime'
 import {
   X,
   Calendar,
@@ -153,7 +154,7 @@ export function TaskDrawer() {
       />
 
       <div
-        className={`fixed right-0 top-0 h-full w-[480px] z-50 bg-[#16162A] border-l border-white/[0.06] shadow-[-20px_0_60px_rgba(0,0,0,0.5)] overflow-y-auto transition-transform duration-300 ${
+        className={`fixed right-0 top-0 h-full w-full md:w-[480px] z-50 bg-[#16162A] border-l border-white/[0.06] shadow-[-20px_0_60px_rgba(0,0,0,0.5)] overflow-y-auto transition-smooth-lg ${
           panelVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -246,7 +247,7 @@ export function TaskDrawer() {
               <label className="text-xs text-slate-500 mb-1 block">Due date</label>
               <input
                 type="datetime-local"
-                value={task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : ''}
+                value={formatUtcForDatetimeLocal(task.due_date)}
                 onChange={(e) => {
                   if (e.target.value) {
                     setTaskDueDate(task.id, new Date(e.target.value))

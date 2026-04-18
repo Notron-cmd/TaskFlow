@@ -1,6 +1,6 @@
 export default function TaskCardSkeleton() {
   return (
-    <div className="bg-[#16162A] border border-white/[0.06] rounded-xl p-4 animate-pulse">
+    <div className="bg-[#16162A] border border-white/[0.06] rounded-xl p-4 animate-shimmer">
       {/* Row 1 */}
       <div className="flex justify-between mb-2">
         <div className="w-3 h-3 rounded bg-white/[0.06]" />

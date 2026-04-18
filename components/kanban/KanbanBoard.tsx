@@ -41,6 +41,7 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const { tasks, setTasks, moveTaskOptimistic } = useTaskStore()
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [activeTab, setActiveTab] = useState<'todo' | 'in_progress' | 'done'>('todo')
 
   useEffect(() => {
     setTasks(initialTasks)
@@ -110,38 +111,98 @@ export function KanbanBoard({
   }, [])
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-6 h-full [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        {COLUMNS.map((column) => {
-          const columnTasks = tasks
-            .filter((t) => t.status === column.id)
-            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    <div className="flex flex-col h-full">
+      {/* Tabs - visible on mobile, hidden on md+ */}
+      <div className="md:hidden flex gap-1 mb-3 border-b border-gray-200 dark:border-white/[0.05] overflow-x-auto pb-2">
+        {COLUMNS.map((column) => (
+          <button
+            key={column.id}
+            onClick={() => setActiveTab(column.id)}
+            className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-smooth border-b-2 ${
+              activeTab === column.id
+                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 animate-scale-in'
+                : 'border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            {column.title}
+          </button>
+        ))}
+      </div>
 
-          return (
-            <KanbanColumn
-              key={column.id}
-              id={column.id}
-              title={column.title}
-              tasks={columnTasks}
-              onAddTask={() => {}}
-            />
-          )
-        })}
+      {/* Kanban Container */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Desktop View - 3 columns */}
+        <div className="hidden md:flex gap-4 md:gap-6 w-full overflow-x-auto pb-4 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            {COLUMNS.map((column) => {
+              const columnTasks = tasks
+                .filter((t) => t.status === column.id)
+                .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 
-        <DragOverlay>
-          {activeTask ? (
-            <div className="drop-shadow-2xl">
-              <TaskCard task={activeTask} isDragging={true} />
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+              return (
+                <KanbanColumn
+                  key={column.id}
+                  id={column.id}
+                  title={column.title}
+                  tasks={columnTasks}
+                  onAddTask={() => {}}
+                />
+              )
+            })}
+
+            <DragOverlay>
+              {activeTask ? (
+                <div className="drop-shadow-2xl">
+                  <TaskCard task={activeTask} isDragging={true} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+
+        {/* Mobile View - Single column tab */}
+        <div className="md:hidden flex-1 overflow-y-auto pb-4 w-full">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            {COLUMNS.map((column) => {
+              const columnTasks = tasks
+                .filter((t) => t.status === column.id)
+                .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+
+              if (column.id !== activeTab) return null
+
+              return (
+                <KanbanColumn
+                  key={column.id}
+                  id={column.id}
+                  title={column.title}
+                  tasks={columnTasks}
+                  onAddTask={() => {}}
+                />
+              )
+            })}
+
+            <DragOverlay>
+              {activeTask ? (
+                <div className="drop-shadow-2xl">
+                  <TaskCard task={activeTask} isDragging={true} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+      </div>
     </div>
   )
 }

@@ -9,7 +9,7 @@ export function NewTaskButton() {
   return (
     <button
       onClick={() => openCreateModal()}
-      className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors"
+      className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-medium rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-smooth"
     >
       <Plus size={12} />
       New Task

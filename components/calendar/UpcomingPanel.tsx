@@ -10,7 +10,10 @@ import {
   Clock,
   MapPin,
   Users,
+  Trash2,
 } from 'lucide-react'
+import { useState } from 'react'
+import { deleteEvent } from '@/lib/actions/events'
 
 type CalendarEvent = Database['public']['Tables']['calendar_events']['Row'] & {
   tasks?: { id: string; status: string; priority: string } | null
@@ -27,11 +30,24 @@ const EVENT_ICON_MAP: Record<string, { icon: React.ReactNode; color: string }> =
   milestone: { icon: <MapPin size={16} />, color: 'text-amber-400' },
 }
 
-export function UpcomingPanel({ events }: UpcomingPanelProps) {
+export function UpcomingPanel({ events: initialEvents }: UpcomingPanelProps) {
   const { openDrawer } = useTaskStore()
+  const [events, setEvents] = useState(initialEvents)
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null)
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null)
 
   const getEventIcon = (type: string) => {
     return EVENT_ICON_MAP[type] || EVENT_ICON_MAP.task_due
+  }
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await deleteEvent(eventId)
+      setEvents(events.filter((e) => e.id !== eventId))
+      setDeletingEventId(null)
+    } catch (error) {
+      console.error('Failed to delete event:', error)
+    }
   }
 
   const formatDate = (date: string) => {
@@ -108,46 +124,82 @@ export function UpcomingPanel({ events }: UpcomingPanelProps) {
               return (
                 <div
                   key={event.id}
-                  className={`border-b border-white/[0.04] last:border-0 py-3 first:pt-0 cursor-pointer hover:bg-white/[0.02] rounded-lg px-1 transition-colors ${
+                  className={`border-b border-white/[0.04] last:border-0 py-3 first:pt-0 transition-smooth group ${
                     idx === 0 ? '' : ''
                   }`}
+                  style={{
+                    animation: `slideInDown 0.4s ease-out ${idx * 75}ms both`,
+                  }}
+                  onMouseEnter={() => setHoveredEventId(event.id)}
+                  onMouseLeave={() => setHoveredEventId(null)}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className={`flex-shrink-0 ${iconData.color}`}>
-                      {iconData.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm text-white/80 font-medium leading-snug mb-0.5 flex items-center gap-1">
-                        <span className="truncate">{event.title}</span>
-                        {event.linked_task_id && (
-                          <Kanban
-                            size={12}
-                            className="text-amber-400/70 flex-shrink-0 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              openDrawer(event.linked_task_id!)
-                            }}
-                          />
-                        )}
-                      </div>
-                      <div className="text-xs text-slate-500 mb-1">
-                        {formatDate(event.start_at)}
-                      </div>
-                      <div
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-mono capitalize w-fit ${
-                          event.type === 'task_due'
-                            ? 'bg-indigo-500/20 text-indigo-300'
-                            : event.type === 'reminder'
-                              ? 'bg-violet-500/20 text-violet-300'
-                              : event.type === 'meeting'
-                                ? 'bg-teal-500/20 text-teal-300'
-                                : 'bg-amber-500/20 text-amber-300'
-                        }`}
-                      >
-                        {event.type.replace('_', ' ')}
+                  {deletingEventId === event.id ? (
+                    <div className="bg-rose-500/20 border border-rose-500/30 rounded-lg p-2 space-y-2">
+                      <p className="text-xs text-rose-200">Delete "{event.title}"?</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs py-1 rounded"
+                        >
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => setDeletingEventId(null)}
+                          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-xs py-1 rounded"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-start gap-3 px-1 cursor-pointer hover:bg-white/[0.02] rounded-lg p-1 -mx-1">
+                      <div className={`flex-shrink-0 ${iconData.color}`}>
+                        {iconData.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-white/80 font-medium leading-snug mb-0.5 flex items-center gap-1">
+                          <span className="truncate">{event.title}</span>
+                          {event.linked_task_id && (
+                            <Kanban
+                              size={12}
+                              className="text-amber-400/70 flex-shrink-0 cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openDrawer(event.linked_task_id!)
+                              }}
+                            />
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500 mb-1">
+                          {formatDate(event.start_at)}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-mono capitalize ${
+                              event.type === 'task_due'
+                                ? 'bg-indigo-500/20 text-indigo-300'
+                                : event.type === 'reminder'
+                                  ? 'bg-violet-500/20 text-violet-300'
+                                  : event.type === 'meeting'
+                                    ? 'bg-teal-500/20 text-teal-300'
+                                    : 'bg-amber-500/20 text-amber-300'
+                            }`}
+                          >
+                            {event.type.replace('_', ' ')}
+                          </div>
+                          {hoveredEventId === event.id && (
+                            <button
+                              onClick={() => setDeletingEventId(event.id)}
+                              className="ml-auto text-rose-400 hover:text-rose-300 transition-colors"
+                              title="Delete event"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
