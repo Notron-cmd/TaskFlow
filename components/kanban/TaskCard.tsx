@@ -105,10 +105,10 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
     opacity: isSortableDragging ? 0.5 : 1,
   }
 
-  const containerClass = `group relative bg-[#16162A] border rounded-lg md:rounded-xl p-2.5 md:p-4 cursor-grab active:cursor-grabbing transition-smooth touch-none ${
+  const containerClass = `group relative bg-white dark:bg-[#16162A] border rounded-lg md:rounded-xl p-2.5 md:p-4 cursor-grab active:cursor-grabbing transition-smooth touch-none ${
     isSortableDragging || isDragging
-      ? 'border-indigo-500/40 bg-[#191930] shadow-[0_8px_30px_rgba(0,0,0,0.5)] scale-105 rotate-[2deg]'
-      : 'border-white/[0.06] hover:border-indigo-500/30 hover:bg-[#191930]'
+      ? 'border-indigo-500/40 bg-indigo-50 dark:bg-[#191930] shadow-[0_8px_30px_rgba(0,0,0,0.5)] scale-105 rotate-[2deg]'
+      : 'border-gray-200 dark:border-white/[0.06] hover:border-indigo-300 dark:hover:border-indigo-500/30 hover:bg-gray-50 dark:hover:bg-[#191930]'
   }`
 
   const assignees = task.task_assignees || []
@@ -156,13 +156,13 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
       </div>
 
       {/* Title */}
-      <div className="font-display text-xs md:text-sm font-semibold text-white/90 mb-1 leading-snug">
+      <div className="font-display text-xs md:text-sm font-semibold text-black dark:text-white/90 mb-1 leading-snug">
         {task.title}
       </div>
 
       {/* Description */}
       {task.description && (
-        <div className="text-[11px] md:text-xs text-slate-500 line-clamp-2 mb-2 md:mb-3">
+        <div className="text-[11px] md:text-xs text-slate-600 dark:text-slate-500 line-clamp-2 mb-2 md:mb-3">
           {task.description}
         </div>
       )}
@@ -173,13 +173,13 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
           {visibleTags.map((tag, idx) => (
             <div
               key={idx}
-              className="bg-white/[0.05] rounded-md px-1.5 md:px-2 py-0.5 text-[8px] md:text-[10px] text-slate-400"
+              className="bg-gray-100 dark:bg-white/[0.05] rounded-md px-1.5 md:px-2 py-0.5 text-[8px] md:text-[10px] text-slate-700 dark:text-slate-400"
             >
               {tag}
             </div>
           ))}
           {hiddenTagCount > 0 && (
-            <div className="bg-white/[0.05] rounded-md px-1.5 md:px-2 py-0.5 text-[8px] md:text-[10px] text-slate-400">
+            <div className="bg-gray-100 dark:bg-white/[0.05] rounded-md px-1.5 md:px-2 py-0.5 text-[8px] md:text-[10px] text-slate-700 dark:text-slate-400">
               +{hiddenTagCount}
             </div>
           )}
@@ -191,11 +191,11 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
         <div className="flex items-center gap-1 mb-2 md:mb-3">
           <CalendarClock
             size={12}
-            className={overdue ? 'text-rose-400' : 'text-slate-500'}
+            className={overdue ? 'text-rose-500' : 'text-slate-500 dark:text-slate-500'}
           />
           <span
             className={`text-[10px] md:text-xs ${
-              overdue ? 'text-rose-400' : 'text-slate-500'
+              overdue ? 'text-rose-500' : 'text-slate-600 dark:text-slate-500'
             }`}
           >
             {overdue ? 'Overdue · ' : ''}
@@ -218,7 +218,7 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
             return (
               <div
                 key={profile.id}
-                className={`w-4 md:w-5 h-4 md:h-5 rounded-full flex items-center justify-center text-[7px] md:text-[8px] font-bold ring-2 ring-[#16162A] ${colorClass} ${
+                className={`w-4 md:w-5 h-4 md:h-5 rounded-full flex items-center justify-center text-[7px] md:text-[8px] font-bold ring-2 ring-white dark:ring-[#16162A] ${colorClass} ${
                   idx > 0 ? '-ml-1.5' : ''
                 }`}
               >
@@ -235,7 +235,7 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
             )
           })}
           {hiddenCount > 0 && (
-            <div className="w-4 md:w-5 h-4 md:h-5 rounded-full flex items-center justify-center text-[7px] md:text-[8px] font-bold ring-2 ring-[#16162A] bg-slate-700 text-slate-400 -ml-1.5">
+            <div className="w-4 md:w-5 h-4 md:h-5 rounded-full flex items-center justify-center text-[7px] md:text-[8px] font-bold ring-2 ring-white dark:ring-[#16162A] bg-gray-300 dark:bg-slate-700 text-gray-700 dark:text-slate-400 -ml-1.5">
               +{hiddenCount}
             </div>
           )}
@@ -245,16 +245,16 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
         <div className="flex items-center gap-2 md:gap-3">
           {task.attachment_count && task.attachment_count > 0 && (
             <div className="flex items-center gap-0.5">
-              <Paperclip size={11} className="text-slate-600" />
-              <span className="text-[9px] md:text-xs text-slate-600">
+              <Paperclip size={11} className="text-slate-500 dark:text-slate-600" />
+              <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-600">
                 {task.attachment_count}
               </span>
             </div>
           )}
           {task.comment_count && task.comment_count > 0 && (
             <div className="flex items-center gap-0.5">
-              <MessageSquare size={11} className="text-slate-600" />
-              <span className="text-[9px] md:text-xs text-slate-600">
+              <MessageSquare size={11} className="text-slate-500 dark:text-slate-600" />
+              <span className="text-[9px] md:text-xs text-slate-600 dark:text-slate-600">
                 {task.comment_count}
               </span>
             </div>
@@ -267,7 +267,7 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
         className="absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <GripVertical size={11} className="text-slate-700" />
+        <GripVertical size={11} className="text-slate-400 dark:text-slate-700" />
       </div>
     </div>
   )

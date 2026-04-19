@@ -182,17 +182,17 @@ export function CalendarGrid({
           <button
             onClick={handlePrevMonth}
             disabled={isNavigating}
-            className="p-2 rounded-lg hover:bg-white/[0.05] text-slate-400 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.05] text-slate-600 dark:text-slate-400 transition-smooth disabled:opacity-50"
           >
             <ChevronLeft size={18} />
           </button>
-          <span className="font-display text-base md:text-lg font-bold text-white mx-3 min-w-fit text-center md:min-w-[120px]">
+          <span className="font-display text-base md:text-lg font-bold text-black dark:text-white mx-3 min-w-fit text-center md:min-w-[120px]">
             {monthNames[currentMonth]} {currentYear}
           </span>
           <button
             onClick={handleNextMonth}
             disabled={isNavigating}
-            className="p-2 rounded-lg hover:bg-white/[0.05] text-slate-400 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.05] text-slate-600 dark:text-slate-400 transition-smooth disabled:opacity-50"
           >
             <ChevronRight size={18} />
           </button>
@@ -200,7 +200,7 @@ export function CalendarGrid({
 
         <button
           onClick={handleToday}
-          className="text-xs text-indigo-400 hover:underline cursor-pointer transition-colors"
+          className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer transition-smooth"
         >
           Today
         </button>
@@ -210,13 +210,13 @@ export function CalendarGrid({
       <div className="block">
         <div className="grid grid-cols-7 mb-1">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-            <div key={day} className="text-center text-xs font-mono text-slate-600 uppercase pb-2">
+            <div key={day} className="text-center text-xs font-mono text-slate-600 dark:text-slate-600 uppercase pb-2">
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-[1px] bg-white/[0.04] rounded-xl overflow-hidden">
+        <div className="grid grid-cols-7 gap-0.5 bg-indigo-300/40 dark:bg-white/[0.03] rounded-xl overflow-hidden">
           {days.map((date, idx) => {
             const dayEvents = getEventsForDay(date)
             const isCurrentMonth = date.getMonth() === currentMonth
@@ -225,7 +225,7 @@ export function CalendarGrid({
             return (
               <div
                 key={idx}
-                className={`bg-[#16162A] p-2 md:p-3 min-h-[80px] md:min-h-[100px] hover:bg-[#191930] cursor-pointer transition-smooth ${
+                className={`bg-gray-200 dark:bg-[#16162A] p-2 md:p-3 min-h-[80px] md:min-h-[100px] hover:bg-gray-300 dark:hover:bg-[#191930] cursor-pointer transition-smooth border border-gray-300/50 dark:border-white/[0.03] ${
                   !isCurrentMonth ? 'opacity-30' : ''
                 }`}
                 style={{
@@ -238,7 +238,7 @@ export function CalendarGrid({
                       {date.getDate()}
                     </div>
                   ) : (
-                    <span className={isCurrentMonth ? 'text-slate-400 text-xs' : 'text-slate-600 text-xs'}>
+                    <span className={isCurrentMonth ? 'text-black dark:text-slate-400 text-xs' : 'text-gray-400 dark:text-slate-600 text-xs'}>
                       {date.getDate()}
                     </span>
                   )}

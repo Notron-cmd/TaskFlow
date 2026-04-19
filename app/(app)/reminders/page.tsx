@@ -132,7 +132,7 @@ export default function RemindersPage() {
         {reminders.map((reminder, idx) => (
           <div
             key={reminder.id}
-            className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-smooth"
+            className="bg-white dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-lg p-4 hover:border-gray-400 dark:hover:border-slate-600 transition-smooth"
             style={{
               animation: `slideInUp 0.4s ease-out ${idx * 50}ms both`,
             }}
@@ -140,11 +140,11 @@ export default function RemindersPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-white truncate">
+                  <h3 className="font-semibold text-black dark:text-white truncate">
                     {reminder.calendar_events?.title || 'Unnamed Event'}
                   </h3>
                   {reminder.sent && (
-                    <span className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300">
+                    <span className="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300">
                       Sent
                     </span>
                   )}

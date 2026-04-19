@@ -22,10 +22,10 @@ export default async function CalendarPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <h1 className="font-display text-2xl font-bold text-white mb-2">
+          <h1 className="font-display text-2xl font-bold text-black dark:text-white mb-2">
             No workspace found
           </h1>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 dark:text-slate-500 text-sm">
             Please create or join a workspace to continue
           </p>
         </div>

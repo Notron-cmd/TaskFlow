@@ -49,16 +49,16 @@ type DrawerTask = {
 }
 
 const PRIORITY_CONFIG = {
-  urgent: { bg: 'bg-rose-500/15', text: 'text-rose-300', border: 'border-rose-500/30', label: 'Urgent' },
-  high: { bg: 'bg-orange-500/15', text: 'text-orange-300', border: 'border-orange-500/30', label: 'High' },
-  medium: { bg: 'bg-amber-500/15', text: 'text-amber-300', border: 'border-amber-500/30', label: 'Medium' },
-  low: { bg: 'bg-slate-500/15', text: 'text-slate-300', border: 'border-slate-500/30', label: 'Low' },
+  urgent: { bg: 'bg-rose-100 dark:bg-rose-500/15', text: 'text-rose-700 dark:text-rose-300', border: 'border-rose-200 dark:border-rose-500/30', label: 'Urgent' },
+  high: { bg: 'bg-orange-100 dark:bg-orange-500/15', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-500/30', label: 'High' },
+  medium: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-500/30', label: 'Medium' },
+  low: { bg: 'bg-slate-100 dark:bg-slate-500/15', text: 'text-slate-700 dark:text-slate-300', border: 'border-slate-200 dark:border-slate-500/30', label: 'Low' },
 }
 
 const STATUS_CONFIG = {
-  todo: { bg: 'bg-slate-700/60', text: 'text-slate-300', border: 'border-slate-600/40', label: 'To Do' },
-  in_progress: { bg: 'bg-amber-500/15', text: 'text-amber-300', border: 'border-amber-500/30', label: 'In Progress' },
-  done: { bg: 'bg-teal-500/15', text: 'text-teal-300', border: 'border-teal-500/30', label: 'Done' },
+  todo: { bg: 'bg-slate-100 dark:bg-slate-700/60', text: 'text-slate-700 dark:text-slate-300', border: 'border-slate-200 dark:border-slate-600/40', label: 'To Do' },
+  in_progress: { bg: 'bg-amber-100 dark:bg-amber-500/15', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-500/30', label: 'In Progress' },
+  done: { bg: 'bg-teal-100 dark:bg-teal-500/15', text: 'text-teal-700 dark:text-teal-300', border: 'border-teal-200 dark:border-teal-500/30', label: 'Done' },
 }
 
 export function TaskDrawer() {
@@ -71,6 +71,9 @@ export function TaskDrawer() {
   const [hasChanges, setHasChanges] = useState(false)
   const [showSaved, setShowSaved] = useState(false)
   const [panelVisible, setPanelVisible] = useState(false)
+  const [reminders, setReminders] = useState<Array<{ time: string; channel: string }>>([])
+  const [reminderTime, setReminderTime] = useState('5')
+  const [reminderChannel, setReminderChannel] = useState('in_app')
 
   const supabase = createClient()
 
@@ -144,6 +147,21 @@ export function TaskDrawer() {
     }
   }
 
+  const handleAddReminder = async () => {
+    if (!task) return
+    const newReminder = { time: reminderTime, channel: reminderChannel }
+    setReminders([...reminders, newReminder])
+    await addReminder(task.id, parseInt(reminderTime), reminderChannel)
+    setReminderTime('5')
+    setReminderChannel('in_app')
+  }
+
+  const handleDeleteReminder = async (index: number) => {
+    if (!task) return
+    const updatedReminders = reminders.filter((_, i) => i !== index)
+    setReminders(updatedReminders)
+  }
+
   if (!isDrawerOpen) return null
 
   return (
@@ -154,7 +172,7 @@ export function TaskDrawer() {
       />
 
       <div
-        className={`fixed right-0 top-0 h-full w-full md:w-[480px] z-50 bg-[#16162A] border-l border-white/[0.06] shadow-[-20px_0_60px_rgba(0,0,0,0.5)] overflow-y-auto transition-smooth-lg ${
+        className={`fixed right-0 top-0 h-full w-full md:w-[480px] z-50 bg-white dark:bg-[#16162A] border-l border-gray-200 dark:border-white/[0.06] shadow-[-20px_0_60px_rgba(0,0,0,0.5)] overflow-y-auto transition-smooth-lg ${
           panelVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -186,7 +204,7 @@ export function TaskDrawer() {
 
               <button
                 onClick={closeDrawer}
-                className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.05] transition-colors"
+                className="p-1.5 rounded-lg text-slate-500 dark:text-slate-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
               >
                 <X size={18} />
               </button>
@@ -200,12 +218,12 @@ export function TaskDrawer() {
                 setTitle(e.target.value)
                 setHasChanges(true)
               }}
-              className="w-full bg-transparent font-display text-xl font-bold text-white border-b border-transparent hover:border-white/[0.08] focus:border-indigo-500/40 outline-none pb-2 mb-4 transition-colors"
+              className="w-full bg-transparent font-display text-xl font-bold text-black dark:text-white border-b border-transparent hover:border-gray-300 dark:hover:border-white/[0.08] focus:border-indigo-500/40 outline-none pb-2 mb-4 transition-colors"
               placeholder="Task title"
             />
 
             {/* Metadata */}
-            <div className="flex items-center gap-4 mb-4 text-xs text-slate-500 flex-wrap">
+            <div className="flex items-center gap-4 mb-4 text-xs text-slate-600 dark:text-slate-500 flex-wrap">
               <div className="flex items-center gap-1">
                 <User2 size={14} />
                 <span>{task.task_assignees?.length || 0} assignee(s)</span>
@@ -232,19 +250,19 @@ export function TaskDrawer() {
                 setHasChanges(true)
               }}
               placeholder="Add a description..."
-              className="w-full bg-[#1E1E35]/50 border border-transparent hover:border-white/[0.06] focus:border-indigo-500/30 rounded-xl p-4 text-sm text-slate-400 placeholder:text-slate-600 outline-none resize-none min-h-[100px] transition-colors mb-6"
+              className="w-full bg-gray-100 dark:bg-[#1E1E35]/50 border border-gray-200 dark:border-transparent hover:border-gray-300 dark:hover:border-white/[0.06] focus:border-indigo-500/30 dark:focus:border-indigo-500/30 rounded-xl p-4 text-sm text-black dark:text-slate-400 placeholder:text-slate-500 dark:placeholder:text-slate-600 outline-none resize-none min-h-[100px] transition-colors mb-6"
             />
 
             {/* Calendar Link */}
-            <div className="bg-[#1E1E35] rounded-xl p-4 mb-4">
+            <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <CalendarClock size={16} className="text-indigo-400" />
-                <span className="font-display text-sm font-semibold text-white/80">
+                <CalendarClock size={16} className="text-indigo-600 dark:text-indigo-400" />
+                <span className="font-display text-sm font-semibold text-black dark:text-white/80">
                   Calendar & Due Date
                 </span>
               </div>
 
-              <label className="text-xs text-slate-500 mb-1 block">Due date</label>
+              <label className="text-xs text-slate-600 dark:text-slate-500 mb-1 block">Due date</label>
               <input
                 type="datetime-local"
                 value={formatUtcForDatetimeLocal(task.due_date)}
@@ -253,28 +271,32 @@ export function TaskDrawer() {
                     setTaskDueDate(task.id, new Date(e.target.value))
                   }
                 }}
-                className="w-full bg-[#252540] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/40 [color-scheme:dark]"
+                className="w-full bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-sm text-black dark:text-white outline-none focus:border-indigo-500/40 dark:focus:border-indigo-500/40 [color-scheme:light] dark:[color-scheme:dark]"
               />
 
               {task.calendar_event_id && (
-                <div className="mt-3 text-xs text-amber-400/70 flex items-center gap-1">
-                  <CalendarDays size={12} className="text-amber-400" />
+                <div className="mt-3 text-xs text-amber-600 dark:text-amber-400/70 flex items-center gap-1">
+                  <CalendarDays size={12} className="text-amber-600 dark:text-amber-400" />
                   Linked to calendar event
                 </div>
               )}
             </div>
 
             {/* Reminders */}
-            <div className="bg-[#1E1E35] rounded-xl p-4 mb-4">
+            <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <Bell size={16} className="text-violet-400" />
-                <span className="font-display text-sm font-semibold text-white/80">
+                <Bell size={16} className="text-violet-600 dark:text-violet-400" />
+                <span className="font-display text-sm font-semibold text-black dark:text-white/80">
                   Reminders
                 </span>
               </div>
 
               <div className="flex gap-2">
-                <select className="bg-[#252540] border border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-white outline-none [color-scheme:dark]">
+                <select 
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-black dark:text-white outline-none [color-scheme:light] dark:[color-scheme:dark]"
+                >
                   <option value="5">5 min before</option>
                   <option value="15">15 min before</option>
                   <option value="30">30 min before</option>
@@ -282,53 +304,82 @@ export function TaskDrawer() {
                   <option value="1440">1 day before</option>
                 </select>
 
-                <select className="bg-[#252540] border border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-white outline-none [color-scheme:dark]">
+                <select 
+                  value={reminderChannel}
+                  onChange={(e) => setReminderChannel(e.target.value)}
+                  className="bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/[0.08] rounded-lg px-2 py-1.5 text-xs text-black dark:text-white outline-none [color-scheme:light] dark:[color-scheme:dark]"
+                >
                   <option value="in_app">In-app</option>
                   <option value="email">Email</option>
                   <option value="push">Push</option>
                 </select>
 
-                <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap transition-colors">
+                <button 
+                  onClick={handleAddReminder}
+                  className="bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap transition-colors font-medium"
+                >
                   Add
                 </button>
               </div>
+
+              {reminders.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {reminders.map((reminder, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between bg-white dark:bg-[#16162A] border border-gray-200 dark:border-white/[0.06] rounded-lg p-2"
+                    >
+                      <span className="text-xs text-slate-600 dark:text-slate-400">
+                        {reminder.time}m • {reminder.channel}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteReminder(idx)}
+                        className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-500/[0.15] rounded p-1 transition-colors"
+                        title="Delete reminder"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Assignees */}
             <div className="mb-4">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">
+              <p className="text-xs text-slate-600 dark:text-slate-500 uppercase tracking-wide mb-2">
                 Assignees
               </p>
-              <button className="w-7 h-7 rounded-lg border border-dashed border-white/[0.06] flex items-center justify-center hover:bg-white/[0.05] transition-colors">
-                <span className="text-slate-400">+</span>
+              <button className="w-7 h-7 rounded-lg border border-dashed border-gray-300 dark:border-white/[0.06] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors">
+                <span className="text-slate-500 dark:text-slate-400">+</span>
               </button>
             </div>
 
             {/* Comments */}
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <MessageSquare size={16} className="text-slate-500" />
-                <span className="font-display text-sm font-semibold text-white/80">
+                <MessageSquare size={16} className="text-slate-600 dark:text-slate-500" />
+                <span className="font-display text-sm font-semibold text-black dark:text-white/80">
                   Comments
                 </span>
               </div>
 
-              <div className="bg-[#1E1E35] rounded-xl p-3 flex items-start gap-3">
+              <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-3 flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                   U
                 </div>
                 <textarea
                   placeholder="Add a comment..."
-                  className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-600 outline-none resize-none min-h-[60px]"
+                  className="flex-1 bg-transparent text-sm text-black dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-600 outline-none resize-none min-h-[60px]"
                 />
               </div>
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="sticky bottom-0 bg-[#16162A] border-t border-white/[0.05] px-0 py-4 -mx-6 px-6 mt-6 flex items-center justify-between">
+            <div className="sticky bottom-0 bg-white dark:bg-[#16162A] border-t border-gray-200 dark:border-white/[0.05] px-0 py-4 -mx-6 px-6 mt-6 flex items-center justify-between">
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-2 text-xs text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/[0.08] rounded-lg px-3 py-2 transition-all"
+                className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400/60 hover:text-rose-700 dark:hover:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/[0.08] rounded-lg px-3 py-2 transition-all"
               >
                 <Trash2 size={14} />
                 Delete task

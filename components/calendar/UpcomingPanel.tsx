@@ -99,23 +99,23 @@ export function UpcomingPanel({ events: initialEvents }: UpcomingPanelProps) {
 
   return (
     <div className="w-72 flex-shrink-0 flex flex-col gap-4 overflow-y-auto">
-      <button className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-display font-medium text-sm rounded-xl py-2.5 flex items-center justify-center gap-2 transition-colors">
+      <button className="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-display font-medium text-sm rounded-xl py-2.5 flex items-center justify-center gap-2 transition-smooth">
         <Plus size={16} />
         New Event
       </button>
 
-      <div className="bg-[#16162A] rounded-xl p-4">
+      <div className="bg-gray-200 dark:bg-[#16162A] border border-gray-300 dark:border-white/[0.06] rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <CalendarDays size={16} className="text-teal-400" />
-          <span className="font-display text-sm font-semibold text-white/80">
+          <CalendarDays size={16} className="text-gray-600 dark:text-teal-400" />
+          <span className="font-display text-sm font-semibold text-black dark:text-white/80">
             Upcoming
           </span>
         </div>
 
         {events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8">
-            <CalendarDays size={32} className="text-slate-700 mb-2" />
-            <p className="text-sm text-slate-600">No upcoming events</p>
+            <CalendarDays size={32} className="text-gray-400 dark:text-slate-700 mb-2" />
+            <p className="text-sm text-gray-600 dark:text-slate-600">No upcoming events</p>
           </div>
         ) : (
           <div className="space-y-0">
@@ -152,12 +152,12 @@ export function UpcomingPanel({ events: initialEvents }: UpcomingPanelProps) {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-3 px-1 cursor-pointer hover:bg-white/[0.02] rounded-lg p-1 -mx-1">
+                    <div className="flex items-start gap-3 px-1 cursor-pointer hover:bg-gray-300/50 dark:hover:bg-white/[0.02] rounded-lg p-1 -mx-1">
                       <div className={`flex-shrink-0 ${iconData.color}`}>
                         {iconData.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-white/80 font-medium leading-snug mb-0.5 flex items-center gap-1">
+                        <div className="text-sm text-black dark:text-white/80 font-medium leading-snug mb-0.5 flex items-center gap-1">
                           <span className="truncate">{event.title}</span>
                           {event.linked_task_id && (
                             <Kanban
@@ -170,7 +170,7 @@ export function UpcomingPanel({ events: initialEvents }: UpcomingPanelProps) {
                             />
                           )}
                         </div>
-                        <div className="text-xs text-slate-500 mb-1">
+                        <div className="text-xs text-slate-500 dark:text-slate-500 mb-1">
                           {formatDate(event.start_at)}
                         </div>
                         <div className="flex items-center gap-2">
@@ -207,30 +207,30 @@ export function UpcomingPanel({ events: initialEvents }: UpcomingPanelProps) {
         )}
       </div>
 
-      <div className="bg-[#16162A] rounded-xl p-4">
+      <div className="bg-gray-200 dark:bg-[#16162A] border border-gray-300 dark:border-white/[0.06] rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Clock size={16} className="text-slate-500" />
-          <span className="font-display text-sm font-semibold text-white/80">
+          <Clock size={16} className="text-gray-600 dark:text-slate-500" />
+          <span className="font-display text-sm font-semibold text-black dark:text-white/80">
             This week
           </span>
         </div>
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-slate-500">Tasks due</span>
-            <span className="text-white font-mono font-medium">
+            <span className="text-black dark:text-slate-500">Tasks due</span>
+            <span className="text-black dark:text-white font-mono font-medium">
               {events.filter((e) => e.type === 'task_due').length}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Meetings</span>
-            <span className="text-white font-mono font-medium">
+            <span className="text-black dark:text-slate-500">Meetings</span>
+            <span className="text-black dark:text-white font-mono font-medium">
               {events.filter((e) => e.type === 'meeting').length}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Reminders</span>
-            <span className="text-white font-mono font-medium">
+            <span className="text-black dark:text-slate-500">Reminders</span>
+            <span className="text-black dark:text-white font-mono font-medium">
               {events.filter((e) => e.type === 'reminder').length}
             </span>
           </div>

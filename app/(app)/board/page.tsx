@@ -53,10 +53,10 @@ export default async function BoardPage() {
       {/* Header - Responsive */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 mb-4 md:mb-6 animate-slide-in-down">
         <div className="flex items-center gap-3">
-          <h1 className="font-display text-xl md:text-2xl font-bold text-white">
+          <h1 className="font-display text-xl md:text-2xl font-bold text-black dark:text-white">
             My Board
           </h1>
-          <span className="text-xs md:text-sm text-slate-500 bg-slate-800/50 px-2 py-1 rounded-full">
+          <span className="text-xs md:text-sm text-slate-600 dark:text-slate-500 bg-slate-200 dark:bg-slate-800/50 px-2 py-1 rounded-full">
             {taskCount} {taskCount !== 1 ? 'tasks' : 'task'}
           </span>
         </div>
@@ -68,8 +68,8 @@ export default async function BoardPage() {
               key={filter}
               className={`rounded-full px-2.5 md:px-3 py-1 text-xs whitespace-nowrap border transition-all ${
                 filter === 'All'
-                  ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
-                  : 'text-slate-400 border-white/[0.08] hover:text-slate-200 hover:bg-white/[0.05]'
+                  ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30'
+                  : 'text-slate-600 dark:text-slate-400 border-gray-300 dark:border-white/[0.08] hover:text-slate-800 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-white/[0.05]'
               }`}
             >
               {filter}
