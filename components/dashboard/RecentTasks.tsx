@@ -3,7 +3,6 @@
 import { useTaskStore } from '@/stores/taskStore'
 import { Database } from '@/types/database.types'
 import { ChevronRight, Clock } from 'lucide-react'
-import { format } from 'date-fns'
 
 type Task = Database['public']['Tables']['tasks']['Row']
 
@@ -12,9 +11,10 @@ interface RecentTasksProps {
 }
 
 const priorityConfig = {
-  high: { bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400', label: 'High' },
-  medium: { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', label: 'Medium' },
-  low: { bg: 'bg-teal-500/10', text: 'text-teal-600 dark:text-teal-400', label: 'Low' },
+  urgent: { bg: 'bg-rose-100 dark:bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400', label: 'Urgent' },
+  high: { bg: 'bg-orange-100 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', label: 'High' },
+  medium: { bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', label: 'Medium' },
+  low: { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400', label: 'Low' },
 }
 
 const statusConfig = {
@@ -51,7 +51,7 @@ export function RecentTasks({ tasks }: RecentTasksProps) {
             <div
               key={task.id}
               onClick={() => openDrawer(task.id)}
-              className="flex items-center justify-between p-3 rounded-lg hover:bg-amber-100 dark:hover:bg-white/[0.04] cursor-pointer transition-smooth group"
+              className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-300 dark:hover:bg-white/[0.04] cursor-pointer transition-smooth group"
               style={{
                 animation: `slideInUp 0.3s ease-out ${idx * 50}ms both`,
               }}
