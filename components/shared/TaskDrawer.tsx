@@ -12,6 +12,7 @@ import {
   addReminder,
   deleteReminder,
 } from '@/lib/actions/reminders'
+import { getTaskAttachments, getTaskComments } from '@/lib/actions/task-details'
 import { formatUtcForDatetimeLocal } from '@/lib/utils/datetime'
 import {
   X,
@@ -29,6 +30,9 @@ import {
   Check,
   Kanban,
 } from 'lucide-react'
+import { AttachmentsList } from '@/components/shared/AttachmentsList'
+import { CommentsList } from '@/components/shared/CommentsList'
+import { toast } from '@/hooks/use-toast'
 
 type DrawerTask = {
   id: string
@@ -76,12 +80,26 @@ export function TaskDrawer() {
   const [reminders, setReminders] = useState<Array<{ time: string; channel: string }>>([])
   const [reminderTime, setReminderTime] = useState('5')
   const [reminderChannel, setReminderChannel] = useState('in_app')
+  const [attachments, setAttachments] = useState<Array<any>>([])
+  const [comments, setComments] = useState<Array<any>>([])
+  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false)
 
   const supabase = createClient()
 
   useEffect(() => {
     setPanelVisible(isDrawerOpen)
   }, [isDrawerOpen])
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    getCurrentUser()
+  }, [supabase])
 
   useEffect(() => {
     if (!activeTaskId || !isDrawerOpen) {
@@ -108,6 +126,32 @@ export function TaskDrawer() {
 
     fetchTask()
   }, [activeTaskId, isDrawerOpen, supabase])
+
+  useEffect(() => {
+    if (!activeTaskId || !isDrawerOpen) {
+      setAttachments([])
+      setComments([])
+      return
+    }
+
+    const fetchDetails = async () => {
+      try {
+        setIsLoadingDetails(true)
+        const [attachmentsData, commentsData] = await Promise.all([
+          getTaskAttachments(activeTaskId),
+          getTaskComments(activeTaskId),
+        ])
+        setAttachments(attachmentsData)
+        setComments(commentsData)
+      } catch (error) {
+        console.error('Error fetching task details:', error)
+      } finally {
+        setIsLoadingDetails(false)
+      }
+    }
+
+    fetchDetails()
+  }, [activeTaskId, isDrawerOpen])
 
   const handleStatusChange = async () => {
     if (!task) return
@@ -162,6 +206,26 @@ export function TaskDrawer() {
     if (!task) return
     const updatedReminders = reminders.filter((_, i) => i !== index)
     setReminders(updatedReminders)
+  }
+
+  const handleRefreshAttachments = async () => {
+    if (!activeTaskId) return
+    try {
+      const attachmentsData = await getTaskAttachments(activeTaskId)
+      setAttachments(attachmentsData)
+    } catch (error) {
+      console.error('Error refreshing attachments:', error)
+    }
+  }
+
+  const handleRefreshComments = async () => {
+    if (!activeTaskId) return
+    try {
+      const commentsData = await getTaskComments(activeTaskId)
+      setComments(commentsData)
+    } catch (error) {
+      console.error('Error refreshing comments:', error)
+    }
   }
 
   if (!isDrawerOpen) return null
@@ -347,14 +411,26 @@ export function TaskDrawer() {
               )}
             </div>
 
-            {/* Assignees */}
+            {/* Attachments */}
             <div className="mb-4">
-              <p className="text-xs text-slate-600 dark:text-slate-500 uppercase tracking-wide mb-2">
-                Assignees
-              </p>
-              <button className="w-7 h-7 rounded-lg border border-dashed border-gray-300 dark:border-white/[0.06] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors">
-                <span className="text-slate-500 dark:text-slate-400">+</span>
-              </button>
+              <div className="flex items-center gap-2 mb-3">
+                <Paperclip size={16} className="text-slate-600 dark:text-slate-500" />
+                <span className="font-display text-sm font-semibold text-black dark:text-white/80">
+                  Attachments ({attachments.length})
+                </span>
+              </div>
+
+              {isLoadingDetails ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 size={16} className="animate-spin text-slate-500" />
+                </div>
+              ) : (
+                <AttachmentsList 
+                  taskId={task?.id || ''}
+                  attachments={attachments}
+                  onAttachmentDeleted={handleRefreshAttachments}
+                />
+              )}
             </div>
 
             {/* Comments */}
@@ -362,19 +438,23 @@ export function TaskDrawer() {
               <div className="flex items-center gap-2 mb-3">
                 <MessageSquare size={16} className="text-slate-600 dark:text-slate-500" />
                 <span className="font-display text-sm font-semibold text-black dark:text-white/80">
-                  Comments
+                  Comments ({comments.length})
                 </span>
               </div>
 
-              <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-3 flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                  U
+              {isLoadingDetails ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 size={16} className="animate-spin text-slate-500" />
                 </div>
-                <textarea
-                  placeholder="Add a comment..."
-                  className="flex-1 bg-transparent text-sm text-black dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-600 outline-none resize-none min-h-[60px]"
+              ) : (
+                <CommentsList
+                  taskId={task?.id || ''}
+                  comments={comments}
+                  currentUserId={currentUserId}
+                  onCommentAdded={handleRefreshComments}
+                  onCommentDeleted={handleRefreshComments}
                 />
-              </div>
+              )}
             </div>
 
             {/* Bottom Action Bar */}

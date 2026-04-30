@@ -113,20 +113,26 @@ export function KanbanBoard({
   return (
     <div className="flex flex-col h-full">
       {/* Tabs - visible on mobile, hidden on md+ */}
-      <div className="md:hidden flex gap-1 mb-3 border-b border-gray-200 dark:border-white/[0.05] overflow-x-auto pb-2">
-        {COLUMNS.map((column) => (
-          <button
-            key={column.id}
-            onClick={() => setActiveTab(column.id)}
-            className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-smooth border-b-2 ${
-              activeTab === column.id
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 animate-scale-in'
-                : 'border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {column.title}
-          </button>
-        ))}
+      <div className="md:hidden flex gap-1 mb-3 border-b border-gray-200 dark:border-white/[0.05] overflow-x-auto pb-2 sticky top-0 bg-white dark:bg-[#0F0F1A] z-10">
+        {COLUMNS.map((column) => {
+          const columnTasks = tasks.filter((t) => t.status === column.id)
+          return (
+            <button
+              key={column.id}
+              onClick={() => setActiveTab(column.id)}
+              className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-smooth border-b-2 flex items-center gap-1.5 ${
+                activeTab === column.id
+                  ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 animate-scale-in'
+                  : 'border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {column.title}
+              <span className="text-[10px] bg-gray-200 dark:bg-slate-700 px-1.5 py-0.5 rounded-full">
+                {columnTasks.length}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
       {/* Kanban Container */}
@@ -166,8 +172,8 @@ export function KanbanBoard({
           </DndContext>
         </div>
 
-        {/* Mobile View - Single column tab */}
-        <div className="md:hidden flex-1 overflow-y-auto pb-4 w-full">
+        {/* Mobile View - Full width single column with smooth transition */}
+        <div className="md:hidden flex-1 overflow-hidden flex items-stretch">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
@@ -180,16 +186,20 @@ export function KanbanBoard({
                 .filter((t) => t.status === column.id)
                 .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 
-              if (column.id !== activeTab) return null
-
               return (
-                <KanbanColumn
+                <div
                   key={column.id}
-                  id={column.id}
-                  title={column.title}
-                  tasks={columnTasks}
-                  onAddTask={() => {}}
-                />
+                  className={`w-full flex-shrink-0 flex flex-col overflow-y-auto pb-4 transition-opacity duration-300 ${
+                    column.id === activeTab ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'
+                  }`}
+                >
+                  <KanbanColumn
+                    id={column.id}
+                    title={column.title}
+                    tasks={columnTasks}
+                    onAddTask={() => {}}
+                  />
+                </div>
               )
             })}
 

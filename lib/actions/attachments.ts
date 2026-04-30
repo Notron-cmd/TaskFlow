@@ -8,7 +8,9 @@ type TaskAttachment = Database['public']['Tables']['task_attachments']['Row']
 
 export async function uploadAttachment(
   taskId: string,
-  file: File
+  fileName: string,
+  fileType: string,
+  fileData: number[]
 ): Promise<TaskAttachment> {
   const supabase = await createClient()
   const {
@@ -19,35 +21,50 @@ export async function uploadAttachment(
     throw new Error('Unauthorized')
   }
 
-  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+  // Convert array back to Uint8Array
+  const uint8Array = new Uint8Array(fileData)
+  const fileSize = uint8Array.byteLength
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024
+  if (fileSize > maxSize) {
+    throw new Error('File size exceeds 5MB limit')
+  }
+
+  const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
   const storagePath = `${user.id}/${taskId}/${Date.now()}-${sanitizedName}`
+
+  // Create Blob from Uint8Array
+  const blob = new Blob([uint8Array], { type: fileType })
 
   const { error: uploadError } = await supabase.storage
     .from('attachments')
-    .upload(storagePath, file, {
+    .upload(storagePath, blob, {
       cacheControl: '3600',
       upsert: false,
+      contentType: fileType,
     })
 
   if (uploadError) {
-    throw new Error(uploadError.message)
+    throw new Error(`Upload failed: ${uploadError.message}`)
   }
 
+  // Only insert fields that exist in the table
   const { data: attachment, error: insertError } = await supabase
     .from('task_attachments')
     .insert({
       task_id: taskId,
+      file_name: fileName,
+      file_size: fileSize,
       uploaded_by: user.id,
-      file_name: file.name,
-      file_size: file.size,
-      mime_type: file.type,
-      storage_path: storagePath,
     })
     .select()
     .single()
 
   if (insertError) {
-    throw new Error(insertError.message)
+    // If database insert fails, cleanup the uploaded file
+    await supabase.storage.from('attachments').remove([storagePath])
+    throw new Error(`Failed to save attachment: ${insertError.message}`)
   }
 
   revalidatePath('/board')
