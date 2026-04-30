@@ -7,9 +7,11 @@ import {
   updateTask,
   setTaskDueDate,
   deleteTask,
+} from '@/lib/actions/tasks'
+import {
   addReminder,
   deleteReminder,
-} from '@/lib/actions/tasks'
+} from '@/lib/actions/reminders'
 import { formatUtcForDatetimeLocal } from '@/lib/utils/datetime'
 import {
   X,
@@ -151,7 +153,7 @@ export function TaskDrawer() {
     if (!task) return
     const newReminder = { time: reminderTime, channel: reminderChannel }
     setReminders([...reminders, newReminder])
-    await addReminder(task.id, parseInt(reminderTime), reminderChannel)
+    await addReminder(task.id, parseInt(reminderTime), reminderChannel as 'in_app' | 'email' | 'push')
     setReminderTime('5')
     setReminderChannel('in_app')
   }
@@ -167,7 +169,7 @@ export function TaskDrawer() {
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 opacity-100"
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${panelVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={closeDrawer}
       />
 

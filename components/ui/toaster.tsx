@@ -35,10 +35,11 @@ export function Toaster() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`pointer-events-auto mb-3 flex items-start gap-3 rounded-lg border backdrop-blur-sm px-4 py-3 shadow-lg transition-all duration-200 group ${
+          onClick={() => handleDismiss(toast.id)}
+          className={`pointer-events-auto mb-3 flex items-start gap-3 rounded-lg border backdrop-blur-sm px-4 py-3 shadow-lg transition-all duration-200 group cursor-pointer ${
             toast.variant === 'destructive'
-              ? 'border-rose-500/30 bg-rose-500/10 text-rose-100'
-              : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-100'
+              ? 'border-rose-500/30 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15'
+              : 'border-indigo-500/30 bg-indigo-500/10 text-indigo-100 hover:bg-indigo-500/15'
           } ${toast.open ? 'animate-in fade-in slide-in-from-bottom-2' : 'animate-out fade-out slide-out-to-bottom-2'}`}
         >
           <div className="flex-1 min-w-0">
@@ -51,12 +52,11 @@ export function Toaster() {
           </div>
 
           <button
-            onClick={() => handleDismiss(toast.id)}
-            onMouseDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation()
-              console.log('[Toaster] Button mouse down:', toast.id)
+              handleDismiss(toast.id)
             }}
-            className="flex-shrink-0 mt-0.5 p-1.5 rounded-md hover:bg-white/20 opacity-50 group-hover:opacity-100 transition-all cursor-pointer"
+            className="flex-shrink-0 mt-0.5 p-1.5 rounded-md hover:bg-white/20 opacity-50 group-hover:opacity-100 transition-all cursor-pointer active:scale-95"
             type="button"
             aria-label="Dismiss notification"
             title="Close notification"
