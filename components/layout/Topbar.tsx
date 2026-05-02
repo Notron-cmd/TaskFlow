@@ -10,6 +10,7 @@ import { MobileSidebar } from '@/components/layout/MobileSidebar'
 import { useSearchStore } from '@/stores/searchStore'
 import { searchTasks, getRecentItems } from '@/lib/actions/search'
 import { SearchResults } from '@/components/search/SearchResults'
+import { useThemeColor } from '@/hooks/useThemeColor'
 
 const PAGE_TITLES: Record<string, string> = {
   '/board': 'Board',
@@ -37,6 +38,7 @@ export function Topbar({ user }: TopbarProps) {
   const { query, setQuery, setResults, setIsOpen, isOpen: isSearchOpen, clearSearch } = useSearchStore()
   const [isSearching, setIsSearching] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const { primary, focus } = useThemeColor()
 
   const initials = user.user_metadata?.full_name
     ? user.user_metadata.full_name
@@ -135,7 +137,23 @@ export function Topbar({ user }: TopbarProps) {
                 setIsOpen(true)
               }}
               placeholder="Search tasks & events..."
-              className="bg-gray-100 dark:bg-[#1E1E35] border border-gray-300 dark:border-white/[0.08] hover:border-gray-400 dark:hover:border-white/[0.15] focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 rounded-lg pl-8 pr-3 py-1.5 text-sm text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-600 outline-none w-48 transition-all duration-150"
+              className="bg-gray-100 dark:bg-[#1E1E35] border border-gray-300 dark:border-white/[0.08] hover:border-gray-400 dark:hover:border-white/[0.15] rounded-lg pl-8 pr-3 py-1.5 text-sm text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-slate-600 outline-none w-48 transition-all duration-150"
+              style={{
+                borderColor: 'currentColor',
+                focusBorderColor: primary,
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = primary
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focus}40`
+                if (!query.trim()) {
+                  getRecentItems().then(setResults)
+                }
+                setIsOpen(true)
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
             />
             {isSearchOpen && <SearchResults isRecent={!query.trim()} />}
           </div>

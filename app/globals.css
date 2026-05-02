@@ -101,6 +101,46 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Theme-aware element colors */
+a {
+  color: var(--color-primary);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+button {
+  transition: all 0.2s ease;
+}
+
+/* Highlight/mark element */
+mark {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+}
+
+/* Code blocks */
+code {
+  color: var(--color-accent);
+  background-color: var(--color-hover);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
 /* Smooth Animations */
 @keyframes slideInUp {
   from {

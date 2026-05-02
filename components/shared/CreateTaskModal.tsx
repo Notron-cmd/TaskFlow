@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { addReminder } from '@/lib/actions/reminders'
 import { X, Loader2, AlertCircle, Calendar } from 'lucide-react'
 import { useTaskStore } from '@/stores/taskStore'
+import { useThemeColor } from '@/hooks/useThemeColor'
 import { ReminderManager, type ReminderConfig } from './ReminderManager'
 
 type Priority = 'low' | 'medium' | 'high' | 'urgent'
@@ -19,6 +20,7 @@ const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
 
 export function CreateTaskModal() {
   const { isCreateModalOpen, closeCreateModal, upsertTask } = useTaskStore()
+  const { primary, focus } = useThemeColor()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
@@ -191,7 +193,15 @@ export function CreateTaskModal() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter task title..."
               disabled={isLoading}
-              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all disabled:opacity-50"
+              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all disabled:opacity-50"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = primary
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focus}30`
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
               autoFocus
             />
           </div>
@@ -207,7 +217,15 @@ export function CreateTaskModal() {
               placeholder="Add more details..."
               disabled={isLoading}
               rows={3}
-              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all resize-none disabled:opacity-50"
+              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all resize-none disabled:opacity-50"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = primary
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focus}30`
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
             />
           </div>
 
@@ -246,7 +264,15 @@ export function CreateTaskModal() {
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               disabled={isLoading}
-              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all disabled:opacity-50"
+              className="w-full bg-[#1E1E35] border border-white/[0.08] hover:border-white/[0.15] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-600 outline-none transition-all disabled:opacity-50"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = primary
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focus}30`
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
             />
           </div>
 
@@ -274,7 +300,16 @@ export function CreateTaskModal() {
             <button
               type="submit"
               disabled={isLoading || !workspaceId}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{
+                backgroundColor: primary,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.9'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1'
+              }}
             >
               {isLoading ? (
                 <>

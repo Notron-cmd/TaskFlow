@@ -58,7 +58,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="mb-6 md:mb-8 animate-slide-in-down">
         <div className="flex items-center gap-3">
-          <LayoutDashboard className="w-6 h-6 md:w-8 md:h-8 text-indigo-400" />
+          <LayoutDashboard className="w-6 h-6 md:w-8 md:h-8" style={{ color: 'var(--color-primary)' }} />
           <h1 className="font-display text-2xl md:text-3xl font-bold text-black dark:text-white">
             Dashboard
           </h1>
@@ -74,7 +74,7 @@ export default async function DashboardPage() {
           label="Total"
           value={stats.total}
           icon={<LayoutDashboard className="w-5 h-5" />}
-          color="indigo"
+          color="theme"
           delay={0}
         />
         <StatCard

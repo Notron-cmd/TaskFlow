@@ -56,7 +56,9 @@ export async function uploadAttachment(
       task_id: taskId,
       file_name: fileName,
       file_size: fileSize,
+      mime_type: fileType,
       uploaded_by: user.id,
+      storage_path: storagePath,
     })
     .select()
     .single()

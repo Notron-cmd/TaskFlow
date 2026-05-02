@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useThemeColor } from '@/hooks/useThemeColor'
 import {
   LayoutDashboard,
   Kanban,
@@ -36,6 +37,7 @@ export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const { primary, accent, secondary } = useThemeColor()
 
   const displayName = user.user_metadata?.full_name || user.email
   const initials = user.user_metadata?.full_name
@@ -58,7 +60,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Top Section */}
       <div className="px-3 py-5">
         <div className="flex items-center gap-2 px-2 mb-6">
-          <Kanban className="size-5 text-indigo-400" />
+          <Kanban className="size-5" style={{ color: primary }} />
           <span className="font-display text-lg font-bold text-black dark:text-white">
             TaskFlow
           </span>
@@ -78,9 +80,14 @@ export function Sidebar({ user }: SidebarProps) {
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 w-full ${
                 isActive
-                  ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border-r-2 border-indigo-500 font-medium'
+                  ? 'font-medium text-white border-r-2'
                   : 'text-gray-600 dark:text-slate-500 hover:text-gray-800 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/[0.04]'
               }`}
+              style={isActive ? {
+                backgroundColor: primary,
+                borderRightColor: accent,
+                color: 'white',
+              } : {}}
             >
               <Icon className="size-4" />
               <span className="font-body">{item.label}</span>

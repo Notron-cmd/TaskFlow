@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTaskStore } from '@/stores/taskStore'
+import { useThemeColor } from '@/hooks/useThemeColor'
 import { createClient } from '@/lib/supabase/client'
 import {
   updateTask,
@@ -69,6 +70,7 @@ const STATUS_CONFIG = {
 
 export function TaskDrawer() {
   const { activeTaskId, isDrawerOpen, closeDrawer } = useTaskStore()
+  const { primary, focus } = useThemeColor()
   const [task, setTask] = useState<DrawerTask | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -284,8 +286,14 @@ export function TaskDrawer() {
                 setTitle(e.target.value)
                 setHasChanges(true)
               }}
-              className="w-full bg-transparent font-display text-xl font-bold text-black dark:text-white border-b border-transparent hover:border-gray-300 dark:hover:border-white/[0.08] focus:border-indigo-500/40 outline-none pb-2 mb-4 transition-colors"
+              className="w-full bg-transparent font-display text-xl font-bold text-black dark:text-white border-b border-transparent hover:border-gray-300 dark:hover:border-white/[0.08] outline-none pb-2 mb-4 transition-colors"
               placeholder="Task title"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = primary
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'transparent'
+              }}
             />
 
             {/* Metadata */}
@@ -316,13 +324,21 @@ export function TaskDrawer() {
                 setHasChanges(true)
               }}
               placeholder="Add a description..."
-              className="w-full bg-gray-100 dark:bg-[#1E1E35]/50 border border-gray-200 dark:border-transparent hover:border-gray-300 dark:hover:border-white/[0.06] focus:border-indigo-500/30 dark:focus:border-indigo-500/30 rounded-xl p-4 text-sm text-black dark:text-slate-400 placeholder:text-slate-500 dark:placeholder:text-slate-600 outline-none resize-none min-h-[100px] transition-colors mb-6"
+              className="w-full bg-gray-100 dark:bg-[#1E1E35]/50 border border-gray-200 dark:border-transparent hover:border-gray-300 dark:hover:border-white/[0.06] rounded-xl p-4 text-sm text-black dark:text-slate-400 placeholder:text-slate-500 dark:placeholder:text-slate-600 outline-none resize-none min-h-[100px] transition-colors mb-6"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = primary
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focus}30`
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
             />
 
             {/* Calendar Link */}
             <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <CalendarClock size={16} className="text-indigo-600 dark:text-indigo-400" />
+                <CalendarClock size={16} style={{ color: primary }} />
                 <span className="font-display text-sm font-semibold text-black dark:text-white/80">
                   Calendar & Due Date
                 </span>
@@ -337,7 +353,15 @@ export function TaskDrawer() {
                     setTaskDueDate(task.id, new Date(e.target.value))
                   }
                 }}
-                className="w-full bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-sm text-black dark:text-white outline-none focus:border-indigo-500/40 dark:focus:border-indigo-500/40 [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-sm text-black dark:text-white outline-none [color-scheme:light] dark:[color-scheme:dark]"
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = primary
+                  e.currentTarget.style.boxShadow = `0 0 0 2px ${focus}30`
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = ''
+                  e.currentTarget.style.boxShadow = ''
+                }}
               />
 
               {task.calendar_event_id && (
@@ -470,7 +494,14 @@ export function TaskDrawer() {
               {hasChanges && (
                 <button
                   onClick={handleSave}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
+                  className="text-white text-xs font-medium rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
+                  style={{ backgroundColor: primary }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.9'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1'
+                  }}
                 >
                   {isSaving ? (
                     <Loader2 size={12} className="animate-spin" />

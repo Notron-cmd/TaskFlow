@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Bell, CheckCircle2, X, Clock } from 'lucide-react'
 import { useNotificationCount } from '@/hooks/useNotificationCount'
+import { useThemeColor } from '@/hooks/useThemeColor'
 import { useToast } from '@/hooks/use-toast'
 
 export function NotificationBell() {
@@ -10,6 +11,7 @@ export function NotificationBell() {
   const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { count, reminders } = useNotificationCount()
+  const { primary, accent } = useThemeColor()
   const { toast } = useToast()
 
   // Close panel when clicking outside
@@ -66,11 +68,18 @@ export function NotificationBell() {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-lg text-gray-600 dark:text-slate-500 hover:text-gray-800 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-all relative"
+        className="p-2 rounded-lg text-gray-600 dark:text-slate-500 hover:text-gray-800 dark:hover:text-slate-300 transition-all relative"
+        style={{
+          backgroundColor: isOpen ? primary + '10' : 'transparent',
+          color: isOpen ? primary : 'currentColor',
+        }}
       >
         <Bell className="size-4" />
         {count > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 h-5 w-5 bg-rose-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+          <span 
+            className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+            style={{ backgroundColor: primary }}
+          >
             {count > 9 ? '9+' : count}
           </span>
         )}
@@ -113,7 +122,10 @@ export function NotificationBell() {
                   >
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex-shrink-0">
-                        <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                        <div 
+                          className="w-2 h-2 rounded-full animate-pulse"
+                          style={{ backgroundColor: primary }}
+                        />
                       </div>
 
                       <div className="flex-1 min-w-0">

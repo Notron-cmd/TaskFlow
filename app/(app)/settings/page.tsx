@@ -2,6 +2,10 @@
 
 import { useSettingsStore, type Theme, type TaskSort, type CalendarView } from '@/stores/settingsStore'
 import { Sun, Moon, Bell, Clock, Eye, Zap, RotateCcw } from 'lucide-react'
+import { ColorPicker } from '@/components/settings/ColorPicker'
+import { DebugThemeColor } from '@/components/debug/ThemeColorDebug'
+import { ThemeColorTest } from '@/components/debug/ThemeColorTest'
+import { useThemeColor } from '@/hooks/useThemeColor'
 
 interface SettingSectionProps {
   title: string
@@ -10,8 +14,16 @@ interface SettingSectionProps {
 }
 
 function SettingSection({ title, description, children }: SettingSectionProps) {
+  const { accent } = useThemeColor()
+  
   return (
-    <div className="border-b border-gray-300 dark:border-slate-700 pb-6 last:border-b-0">
+    <div 
+      className="pb-6 last:border-b-0"
+      style={{
+        borderBottom: `2px solid ${accent}`,
+        opacity: 0.8,
+      }}
+    >
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-black dark:text-white">{title}</h3>
         {description && <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">{description}</p>}
@@ -29,8 +41,23 @@ interface SettingItemProps {
 }
 
 function SettingItem({ label, description, icon, children }: SettingItemProps) {
+  const { primary, focus } = useThemeColor()
+  
   return (
-    <div className="flex items-start justify-between py-3 px-3 rounded-lg bg-gray-200 dark:bg-slate-900/50 hover:bg-gray-300 dark:hover:bg-slate-900 transition-smooth">
+    <div 
+      className="flex items-start justify-between py-3 px-3 rounded-lg bg-gray-200 dark:bg-slate-900/50 transition-all border-2"
+      style={{
+        borderColor: 'transparent',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = primary
+        e.currentTarget.style.backgroundColor = focus + '20'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'transparent'
+        e.currentTarget.style.backgroundColor = ''
+      }}
+    >
       <div className="flex items-start gap-3 flex-1">
         {icon && <div className="text-gray-600 dark:text-slate-400 mt-1">{icon}</div>}
         <div>
@@ -105,8 +132,11 @@ export default function SettingsPage() {
     resetSettings,
   } = useSettingsStore()
 
+  const { primary, accent } = useThemeColor()
+
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
+      <DebugThemeColor />
       {/* Header */}
       <div className="mb-8 animate-slide-in-down">
         <h1 className="text-3xl font-bold text-black dark:text-white mb-2">Settings</h1>
@@ -128,6 +158,21 @@ export default function SettingsPage() {
               ]}
             />
           </SettingItem>
+
+          <div className="px-3 py-4 rounded-lg bg-gray-200 dark:bg-slate-900/50 hover:bg-gray-300 dark:hover:bg-slate-900 transition-smooth">
+            <div className="flex items-start gap-3">
+              <div className="text-gray-600 dark:text-slate-400 mt-1">
+                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-black dark:text-white">Theme Color</p>
+                <p className="text-xs text-gray-600 dark:text-slate-500 mt-1">Choose your preferred accent color</p>
+                <div className="mt-3">
+                  <ColorPicker />
+                </div>
+              </div>
+            </div>
+          </div>
 
           <SettingItem label="Compact Mode" description="Use compact display for a denser layout" icon={<Eye size={16} />}>
             <Toggle checked={compactMode} onChange={setCompactMode} />
@@ -195,7 +240,10 @@ export default function SettingsPage() {
                 resetSettings()
               }
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 dark:bg-slate-900 hover:bg-gray-300 dark:hover:bg-slate-800 text-gray-800 dark:text-slate-300 hover:text-black dark:hover:text-white transition-smooth active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-all hover:scale-105 active:scale-95"
+            style={{
+              backgroundColor: primary,
+            }}
           >
             <RotateCcw size={16} />
             <span>Reset All Settings</span>
@@ -209,6 +257,9 @@ export default function SettingsPage() {
           Settings are automatically saved to your browser. Clear browser data to reset.
         </p>
       </div>
+
+      {/* Theme Color Test */}
+      <ThemeColorTest />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { Database } from '@/types/database.types'
 import { useTaskStore } from '@/stores/taskStore'
+import { useThemeColor } from '@/hooks/useThemeColor'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
@@ -88,6 +89,7 @@ function formatDate(dateString: string): string {
 
 export default function TaskCard({ task, isDragging }: TaskCardProps) {
   const openDrawer = useTaskStore((state) => state.openDrawer)
+  const { primary, accent } = useThemeColor()
   
   // Setup sortable for drag and drop
   const {
@@ -107,9 +109,13 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
 
   const containerClass = `group relative bg-white dark:bg-[#16162A] border rounded-lg md:rounded-xl p-2.5 md:p-4 cursor-grab active:cursor-grabbing transition-smooth touch-none ${
     isSortableDragging || isDragging
-      ? 'border-indigo-500/40 bg-indigo-50 dark:bg-[#191930] shadow-[0_8px_30px_rgba(0,0,0,0.5)] scale-105 rotate-[2deg]'
-      : 'border-gray-200 dark:border-white/[0.06] hover:border-indigo-300 dark:hover:border-indigo-500/30 hover:bg-gray-50 dark:hover:bg-[#191930]'
+      ? 'bg-gray-50 dark:bg-[#191930] shadow-[0_8px_30px_rgba(0,0,0,0.5)] scale-105 rotate-[2deg]'
+      : 'border-gray-200 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/[0.1] hover:bg-gray-50 dark:hover:bg-[#191930]'
   }`
+
+  const containerStyle = isSortableDragging || isDragging 
+    ? { borderColor: primary + '60' }
+    : { borderColor: 'currentColor' }
 
   const assignees = task.task_assignees || []
   const visibleAssignees = assignees.slice(0, 3)
@@ -125,7 +131,7 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{ ...style, ...containerStyle }}
       className={containerClass}
       onClick={() => openDrawer(task.id)}
       {...attributes}
