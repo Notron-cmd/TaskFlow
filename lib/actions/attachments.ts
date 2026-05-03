@@ -83,34 +83,48 @@ export async function deleteAttachment(attachmentId: string): Promise<void> {
     throw new Error('Unauthorized')
   }
 
+  // Step 1: Fetch attachment details
   const { data: attachment, error: fetchError } = await supabase
     .from('task_attachments')
-    .select('storage_path')
+    .select('storage_path, task_id')
     .eq('id', attachmentId)
     .single()
 
-  if (fetchError) {
-    throw new Error(fetchError.message)
+  if (fetchError || !attachment) {
+    throw new Error(`Attachment not found: ${fetchError?.message || 'Unknown error'}`)
   }
 
+  if (!attachment.storage_path) {
+    throw new Error('Invalid attachment: missing storage_path')
+  }
+
+  // Step 2: Delete from storage
   const { error: storageError } = await supabase.storage
     .from('attachments')
     .remove([attachment.storage_path])
 
-  if (storageError) {
-    throw new Error(storageError.message)
+  // Note: Don't fail if storage delete fails - file might not exist but we still need to clean DB
+  if (storageError && !storageError.message?.includes('not found')) {
+    console.warn(`Storage delete warning: ${storageError.message}`)
   }
 
-  const { error: deleteError } = await supabase
+  // Step 3: Delete from database
+  const { error: deleteError, count } = await supabase
     .from('task_attachments')
     .delete()
     .eq('id', attachmentId)
 
   if (deleteError) {
-    throw new Error(deleteError.message)
+    throw new Error(`Failed to delete attachment record: ${deleteError.message}`)
   }
 
+  if (count === 0) {
+    throw new Error('Attachment record not deleted - may have been deleted already')
+  }
+
+  // Revalidate paths
   revalidatePath('/board')
+  revalidatePath(`/calendar`)
 }
 
 export async function getAttachmentUrl(

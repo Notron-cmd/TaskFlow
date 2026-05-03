@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { unstable_noStore as noStore } from 'next/cache'
 
 type TaskAttachment = {
   id: string
@@ -12,6 +13,8 @@ type TaskAttachment = {
 }
 
 export async function getTaskAttachments(taskId: string): Promise<TaskAttachment[]> {
+  noStore()
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -77,6 +80,8 @@ export async function getTaskComments(taskId: string): Promise<
     author: { full_name: string | null; avatar_url: string | null } | null
   }>
 > {
+  noStore()
+
   const supabase = await createClient()
   const {
     data: { user },

@@ -86,6 +86,7 @@ export function TaskDrawer() {
   const [comments, setComments] = useState<Array<any>>([])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [isLoadingDetails, setIsLoadingDetails] = useState(false)
+  const [isRefreshingAttachments, setIsRefreshingAttachments] = useState(false)
 
   const supabase = createClient()
 
@@ -210,13 +211,55 @@ export function TaskDrawer() {
     setReminders(updatedReminders)
   }
 
-  const handleRefreshAttachments = async () => {
-    if (!activeTaskId) return
+  const handleRefreshAttachments = async (deletedAttachmentId?: string) => {
+    if (!activeTaskId || isRefreshingAttachments) return
+
+    if (deletedAttachmentId) {
+      console.log(`[TaskDrawer] Deleting attachment: ${deletedAttachmentId}`)
+      setAttachments((prev) => {
+        const filtered = prev.filter((a) => a.id !== deletedAttachmentId)
+        console.log(`[TaskDrawer] Optimistic delete - count before: ${prev.length}, after: ${filtered.length}`)
+        return filtered
+      })
+    }
+
     try {
+      setIsRefreshingAttachments(true)
       const attachmentsData = await getTaskAttachments(activeTaskId)
+      console.log(`[TaskDrawer] Refreshed attachments, count: ${attachmentsData.length}`)
+      
+      // Verify the deleted attachment is actually gone
+      if (deletedAttachmentId) {
+        const stillExists = attachmentsData.some(a => a.id === deletedAttachmentId)
+        if (stillExists) {
+          console.error(`[TaskDrawer] ERROR: Attachment ${deletedAttachmentId} still exists after delete!`)
+          // Filter it out from the response - don't let it get restored
+          const filtered = attachmentsData.filter(a => a.id !== deletedAttachmentId)
+          setAttachments(filtered)
+          return
+        } else {
+          console.log(`[TaskDrawer] Confirmed: Attachment ${deletedAttachmentId} successfully deleted`)
+        }
+      }
+      
       setAttachments(attachmentsData)
     } catch (error) {
       console.error('Error refreshing attachments:', error)
+      // On error, don't reset the optimistic deletion
+      // Keep the attachment filtered out until user retries
+    } finally {
+      setIsRefreshingAttachments(false)
+    }
+  }
+
+  const handleAttachmentChanged = async () => {
+    if (!activeTaskId) return
+    try {
+      const attachmentsData = await getTaskAttachments(activeTaskId)
+      console.log(`[TaskDrawer] Attachments updated after upload/change, count: ${attachmentsData.length}`)
+      setAttachments(attachmentsData)
+    } catch (error) {
+      console.error('Error refreshing attachments after change:', error)
     }
   }
 
@@ -453,6 +496,7 @@ export function TaskDrawer() {
                   taskId={task?.id || ''}
                   attachments={attachments}
                   onAttachmentDeleted={handleRefreshAttachments}
+                  onAttachmentChanged={handleAttachmentChanged}
                 />
               )}
             </div>

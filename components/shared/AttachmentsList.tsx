@@ -16,7 +16,8 @@ interface Attachment {
 interface AttachmentsProps {
   taskId: string
   attachments: Attachment[]
-  onAttachmentDeleted?: () => void
+  onAttachmentDeleted?: (deletedAttachmentId?: string) => void | Promise<void>
+  onAttachmentChanged?: () => void | Promise<void>
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -27,7 +28,7 @@ const formatFileSize = (bytes: number): string => {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
-export function AttachmentsList({ taskId, attachments, onAttachmentDeleted }: AttachmentsProps) {
+export function AttachmentsList({ taskId, attachments, onAttachmentDeleted, onAttachmentChanged }: AttachmentsProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -35,18 +36,24 @@ export function AttachmentsList({ taskId, attachments, onAttachmentDeleted }: At
   const handleDelete = async (attachmentId: string) => {
     try {
       setDeleting(attachmentId)
+      console.log(`[AttachmentsList] Deleting attachment: ${attachmentId}`)
+      
       await deleteAttachment(attachmentId)
+      
+      console.log(`[AttachmentsList] Delete successful for: ${attachmentId}`)
       toast({
         title: 'Success',
         description: 'Attachment deleted',
       })
-      onAttachmentDeleted?.()
+      await onAttachmentDeleted?.(attachmentId)
     } catch (error) {
+      console.error(`[AttachmentsList] Delete failed for ${attachmentId}:`, error)
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to delete attachment',
         variant: 'destructive',
       })
+      // Don't call onAttachmentDeleted if delete failed
     } finally {
       setDeleting(null)
     }
@@ -83,7 +90,8 @@ export function AttachmentsList({ taskId, attachments, onAttachmentDeleted }: At
         fileInputRef.current.value = ''
       }
       
-      onAttachmentDeleted?.()
+      // Refresh list after upload
+      await onAttachmentChanged?.()
     } catch (error) {
       toast({
         title: 'Error',
