@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import { deleteEvent } from '@/lib/actions/events'
+import { DateEventsPanel } from './DateEventsPanel'
 
 type CalendarEvent = Database['public']['Tables']['calendar_events']['Row']
 
@@ -44,6 +45,7 @@ export function CalendarGrid({
   const [isNavigating, setIsNavigating] = useState(false)
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null)
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   const supabase = createClient()
 
@@ -93,6 +95,7 @@ export function CalendarGrid({
 
   const handlePrevMonth = useCallback(async () => {
     setIsNavigating(true)
+    setSelectedDate(null)
     let newMonth = currentMonth - 1
     let newYear = currentYear
 
@@ -116,6 +119,7 @@ export function CalendarGrid({
 
   const handleNextMonth = useCallback(async () => {
     setIsNavigating(true)
+    setSelectedDate(null)
     let newMonth = currentMonth + 1
     let newYear = currentYear
 
@@ -140,6 +144,7 @@ export function CalendarGrid({
   const handleToday = useCallback(async () => {
     const now = new Date()
     setIsNavigating(true)
+    setSelectedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
 
     const { data } = await supabase
       .from('calendar_events')
@@ -221,11 +226,24 @@ export function CalendarGrid({
             const dayEvents = getEventsForDay(date)
             const isCurrentMonth = date.getMonth() === currentMonth
             const isTodayDate = isToday(date)
+            const isSelectedDate = selectedDate && 
+              date.getFullYear() === selectedDate.getFullYear() &&
+              date.getMonth() === selectedDate.getMonth() &&
+              date.getDate() === selectedDate.getDate()
 
             return (
               <div
                 key={idx}
-                className={`bg-gray-200 dark:bg-[#16162A] p-2 md:p-3 min-h-[80px] md:min-h-[100px] hover:bg-gray-300 dark:hover:bg-[#191930] cursor-pointer transition-smooth border border-gray-300/50 dark:border-white/[0.03] ${
+                onClick={() => {
+                  if (isCurrentMonth) {
+                    setSelectedDate(new Date(date.getFullYear(), date.getMonth(), date.getDate()))
+                  }
+                }}
+                className={`bg-gray-200 dark:bg-[#16162A] p-2 md:p-3 min-h-[80px] md:min-h-[100px] hover:bg-gray-300 dark:hover:bg-[#191930] cursor-pointer transition-smooth border ${
+                  isSelectedDate 
+                    ? 'border-indigo-500 dark:border-indigo-500 bg-indigo-100/30 dark:bg-indigo-500/10' 
+                    : 'border-gray-300/50 dark:border-white/[0.03]'
+                } ${
                   !isCurrentMonth ? 'opacity-30' : ''
                 }`}
                 style={{
@@ -339,6 +357,15 @@ export function CalendarGrid({
           })}
         </div>
       </div>
+
+      {/* Date Events Panel */}
+      <DateEventsPanel
+        selectedDate={selectedDate}
+        events={events}
+        onEventDeleted={(eventId) => {
+          setEvents(events.filter((e) => e.id !== eventId))
+        }}
+      />
     </div>
   )
 }

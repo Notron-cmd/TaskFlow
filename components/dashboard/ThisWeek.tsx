@@ -40,9 +40,9 @@ export function ThisWeek({ tasks }: ThisWeekProps) {
 
   return (
     <div
-      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6 animate-slide-in-left"
+      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6"
       style={{
-        animation: 'slideInLeft 0.5s ease-out 300ms both',
+        willChange: 'contents',
       }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -64,9 +64,6 @@ export function ThisWeek({ tasks }: ThisWeekProps) {
               key={task.id}
               onClick={() => openDrawer(task.id)}
               className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-white/[0.04] cursor-pointer transition-smooth group"
-              style={{
-                animation: `slideInUp 0.3s ease-out ${idx * 50}ms both`,
-              }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">

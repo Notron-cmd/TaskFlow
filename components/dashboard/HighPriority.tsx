@@ -25,9 +25,9 @@ export function HighPriority({ tasks }: HighPriorityProps) {
 
   return (
     <div
-      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6 animate-slide-in-right"
+      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6"
       style={{
-        animation: 'slideInRight 0.5s ease-out 100ms both',
+        willChange: 'contents',
       }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -48,9 +48,6 @@ export function HighPriority({ tasks }: HighPriorityProps) {
               key={task.id}
               onClick={() => openDrawer(task.id)}
               className="p-3 rounded-lg bg-rose-500/5 dark:bg-rose-500/5 border border-rose-200 dark:border-rose-500/20 hover:bg-rose-500/10 dark:hover:bg-rose-500/10 cursor-pointer transition-smooth group"
-              style={{
-                animation: `slideInDown 0.3s ease-out ${idx * 50}ms both`,
-              }}
             >
               <p className="text-xs font-medium text-black dark:text-white line-clamp-2 group-hover:text-rose-600 dark:group-hover:text-rose-400">
                 {task.title}

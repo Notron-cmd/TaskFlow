@@ -25,11 +25,11 @@ export function StatCard({ label, value, icon, color, delay }: StatCardProps) {
   if (color === 'theme') {
     return (
       <div
-        className="border rounded-xl p-4 md:p-5 animate-scale-in"
+        className="border rounded-xl p-4 md:p-5"
         style={{
-          animation: `scaleIn 0.4s ease-out ${delay}ms both`,
           backgroundColor: primary + '15',
           borderColor: primary + '50',
+          willChange: 'transform',
         }}
       >
         <div className="flex items-start justify-between gap-2">
@@ -51,9 +51,9 @@ export function StatCard({ label, value, icon, color, delay }: StatCardProps) {
 
   return (
     <div
-      className={`border rounded-xl p-4 md:p-5 ${colorClasses[color]} animate-scale-in`}
+      className={`border rounded-xl p-4 md:p-5 ${colorClasses[color]}`}
       style={{
-        animation: `scaleIn 0.4s ease-out ${delay}ms both`,
+        willChange: 'transform',
       }}
     >
       <div className="flex items-start justify-between gap-2">

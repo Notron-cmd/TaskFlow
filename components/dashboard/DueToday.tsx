@@ -27,9 +27,9 @@ export function DueToday({ tasks }: DueTodayProps) {
 
   return (
     <div
-      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6 animate-slide-in-left"
+      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6"
       style={{
-        animation: 'slideInLeft 0.5s ease-out 200ms both',
+        willChange: 'contents',
       }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -51,9 +51,6 @@ export function DueToday({ tasks }: DueTodayProps) {
               key={task.id}
               onClick={() => openDrawer(task.id)}
               className="p-3 rounded-lg bg-rose-500/5 dark:bg-rose-500/5 border border-rose-200 dark:border-rose-500/20 hover:bg-rose-500/10 dark:hover:bg-rose-500/10 cursor-pointer transition-smooth group"
-              style={{
-                animation: `slideInUp 0.3s ease-out ${idx * 50}ms both`,
-              }}
             >
               <p className="text-sm font-medium text-black dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-smooth">
                 {task.title}

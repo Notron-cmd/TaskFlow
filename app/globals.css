@@ -141,7 +141,7 @@ code {
   color: white;
 }
 
-/* Smooth Animations */
+/* Smooth Animations - Optimized for Performance */
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -238,33 +238,40 @@ code {
     text-wrap: balance;
   }
 
-  /* Animation utilities */
+  /* Animation utilities - Optimized */
   .animate-slide-in-up {
-    animation: slideInUp 0.5s ease-out;
+    animation: slideInUp 0.3s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-slide-in-down {
-    animation: slideInDown 0.5s ease-out;
+    animation: slideInDown 0.3s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-slide-in-right {
-    animation: slideInRight 0.5s ease-out;
+    animation: slideInRight 0.3s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-slide-in-left {
-    animation: slideInLeft 0.5s ease-out;
+    animation: slideInLeft 0.3s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
+    animation: fadeIn 0.3s ease-out forwards;
+    will-change: opacity;
   }
 
   .animate-scale-in {
-    animation: scaleIn 0.4s ease-out;
+    animation: scaleIn 0.3s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-pulse-soft {
     animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    will-change: opacity;
   }
 
   .animate-shimmer {
@@ -280,14 +287,15 @@ code {
 
   .animate-bounce-subtle {
     animation: bounce-subtle 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    will-change: transform;
   }
 
-  /* Smooth transitions */
+  /* Smooth transitions - Optimized */
   .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .transition-smooth-lg {
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

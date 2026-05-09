@@ -12,7 +12,6 @@ export function Toaster() {
     const timers = toasts.map((toast) => {
       if (toast.open) {
         return setTimeout(() => {
-          console.log('[Toaster] Auto-dismissing toast:', toast.id)
           dismiss(toast.id)
         }, 5000)
       }
@@ -26,7 +25,6 @@ export function Toaster() {
   }, [toasts, dismiss])
 
   const handleDismiss = (toastId: string) => {
-    console.log('[Toaster] Manual dismiss clicked:', toastId)
     dismiss(toastId)
   }
 

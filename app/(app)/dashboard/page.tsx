@@ -54,9 +54,9 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col h-full animate-fade-in">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="mb-6 md:mb-8 animate-slide-in-down">
+      <div className="mb-6 md:mb-8">
         <div className="flex items-center gap-3">
           <LayoutDashboard className="w-6 h-6 md:w-8 md:h-8" style={{ color: 'var(--color-primary)' }} />
           <h1 className="font-display text-2xl md:text-3xl font-bold text-black dark:text-white">

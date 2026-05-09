@@ -22,9 +22,9 @@ export function TasksAnalytics({ stats }: TasksAnalyticsProps) {
 
   return (
     <div
-      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6 animate-slide-in-right"
+      className="bg-gray-200 dark:bg-slate-800/50 border border-gray-300 dark:border-white/[0.06] rounded-xl p-5 md:p-6"
       style={{
-        animation: 'slideInRight 0.5s ease-out 200ms both',
+        willChange: 'transform',
       }}
     >
       <div className="flex items-center justify-between mb-6">

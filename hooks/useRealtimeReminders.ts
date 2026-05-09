@@ -24,7 +24,6 @@ export function useRealtimeReminders() {
         } = await supabase.auth.getUser()
 
         if (!user) {
-          console.log('[useRealtimeReminders] No authenticated user')
           return
         }
 
@@ -55,17 +54,13 @@ export function useRealtimeReminders() {
           .limit(50)
 
         if (error) {
-          console.error('[useRealtimeReminders] Fetch error:', error)
+          // Silent error handling in production
           return
         }
 
         if (!reminders || reminders.length === 0) {
           return
         }
-
-        console.log(
-          `[useRealtimeReminders] Found ${reminders.length} pending in-app reminders`
-        )
 
         // Show toast for reminders not yet shown
         reminders.forEach((reminder: any) => {
@@ -83,11 +78,6 @@ export function useRealtimeReminders() {
                 ? `Reminder: Task due in ${Math.round(minutesBefore / 60)} hour(s)`
                 : `Reminder: Task due in ${minutesBefore} minute(s)`
 
-            console.log(
-              `[useRealtimeReminders] Showing toast for reminder ${reminder.id}:`,
-              eventTitle
-            )
-
             toast({
               title: eventTitle,
               description,
@@ -96,7 +86,7 @@ export function useRealtimeReminders() {
           }
         })
       } catch (error) {
-        console.error('[useRealtimeReminders] Error fetching reminders:', error)
+        // Error handling in production
       }
     }
 

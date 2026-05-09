@@ -10,6 +10,7 @@ import {
   Bell,
   Settings,
   LogOut,
+  FileText,
 } from 'lucide-react'
 import { useMobileMenuStore } from '@/stores/mobileMenuStore'
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Board', href: '/board', icon: Kanban },
   { label: 'Calendar', href: '/calendar', icon: CalendarDays },
+  { label: 'Notes', href: '/notes', icon: FileText },
   { label: 'Reminders', href: '/reminders', icon: Bell },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]

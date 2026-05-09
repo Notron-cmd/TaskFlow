@@ -9,40 +9,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSettingsStore((state) => state.theme)
   const themeColor = useSettingsStore((state) => state.themeColor)
 
-  // Set mounted flag
+  // Set mounted flag and apply theme/color in single effect
   useEffect(() => {
-    console.log('[ThemeProvider] Mounted')
     setIsMounted(true)
-  }, [])
-
-  // Apply theme class whenever theme changes
-  useEffect(() => {
-    if (!isMounted) return
     
-    console.log('[ThemeProvider] Theme changed to:', theme)
     const root = document.documentElement
     
+    // Apply theme
     if (theme === 'system') {
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       const targetTheme = isDark ? 'dark' : 'light'
       root.classList.remove('dark', 'light')
       root.classList.add(targetTheme)
-      console.log('[ThemeProvider] Applied system theme:', targetTheme)
     } else {
       root.classList.remove('dark', 'light')
       root.classList.add(theme)
-      console.log('[ThemeProvider] Applied explicit theme:', theme)
     }
-  }, [isMounted, theme])
-
-  // Apply color CSS variables whenever color changes
-  useEffect(() => {
-    if (!isMounted) return
     
-    console.log('[ThemeProvider] Color changed to:', themeColor)
-    const root = document.documentElement
+    // Apply color
     applyThemeColor(themeColor, theme, root)
-  }, [isMounted, themeColor, theme])
+  }, [theme, themeColor])
 
   return <>{children}</>
 }
