@@ -14,6 +14,7 @@ import {
   deleteReminder,
 } from '@/lib/actions/reminders'
 import { getTaskAttachments, getTaskComments } from '@/lib/actions/task-details'
+import { getTaskNotes } from '@/lib/actions/task-notes'
 import { formatUtcForDatetimeLocal } from '@/lib/utils/datetime'
 import {
   X,
@@ -30,9 +31,11 @@ import {
   Loader2,
   Check,
   Kanban,
+  BookOpen,
 } from 'lucide-react'
 import { AttachmentsList } from '@/components/shared/AttachmentsList'
 import { CommentsList } from '@/components/shared/CommentsList'
+import { TaskNotes } from '@/components/shared/TaskNotes'
 import { toast } from '@/hooks/use-toast'
 
 type DrawerTask = {
@@ -84,6 +87,7 @@ export function TaskDrawer() {
   const [reminderChannel, setReminderChannel] = useState('in_app')
   const [attachments, setAttachments] = useState<Array<any>>([])
   const [comments, setComments] = useState<Array<any>>([])
+  const [notes, setNotes] = useState<Array<any>>([])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [isLoadingDetails, setIsLoadingDetails] = useState(false)
   const [isRefreshingAttachments, setIsRefreshingAttachments] = useState(false)
@@ -134,18 +138,21 @@ export function TaskDrawer() {
     if (!activeTaskId || !isDrawerOpen) {
       setAttachments([])
       setComments([])
+      setNotes([])
       return
     }
 
     const fetchDetails = async () => {
       try {
         setIsLoadingDetails(true)
-        const [attachmentsData, commentsData] = await Promise.all([
+        const [attachmentsData, commentsData, notesData] = await Promise.all([
           getTaskAttachments(activeTaskId),
           getTaskComments(activeTaskId),
+          getTaskNotes(activeTaskId),
         ])
         setAttachments(attachmentsData)
         setComments(commentsData)
+        setNotes(notesData)
       } catch (error) {
         console.error('Error fetching task details:', error)
       } finally {
@@ -270,6 +277,16 @@ export function TaskDrawer() {
       setComments(commentsData)
     } catch (error) {
       console.error('Error refreshing comments:', error)
+    }
+  }
+
+  const handleRefreshNotes = async () => {
+    if (!activeTaskId) return
+    try {
+      const notesData = await getTaskNotes(activeTaskId)
+      setNotes(notesData)
+    } catch (error) {
+      console.error('Error refreshing notes:', error)
     }
   }
 
@@ -497,6 +514,31 @@ export function TaskDrawer() {
                   attachments={attachments}
                   onAttachmentDeleted={handleRefreshAttachments}
                   onAttachmentChanged={handleAttachmentChanged}
+                />
+              )}
+            </div>
+
+            {/* Notes */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen size={16} className="text-slate-600 dark:text-slate-500" />
+                <span className="font-display text-sm font-semibold text-black dark:text-white/80">
+                  Notes ({notes.length})
+                </span>
+              </div>
+
+              {isLoadingDetails ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 size={16} className="animate-spin text-slate-500" />
+                </div>
+              ) : (
+                <TaskNotes
+                  taskId={task?.id || ''}
+                  notes={notes}
+                  currentUserId={currentUserId}
+                  onNoteAdded={handleRefreshNotes}
+                  onNoteDeleted={handleRefreshNotes}
+                  onNoteUpdated={handleRefreshNotes}
                 />
               )}
             </div>
