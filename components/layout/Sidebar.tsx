@@ -12,12 +12,14 @@ import {
   Settings,
   LogOut,
   ChevronUp,
+  FileText,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Board', href: '/board', icon: Kanban },
   { label: 'Calendar', href: '/calendar', icon: CalendarDays },
+  { label: 'Notes', href: '/notes', icon: FileText },
   { label: 'Reminders', href: '/reminders', icon: Bell },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]

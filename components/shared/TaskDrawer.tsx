@@ -32,10 +32,12 @@ import {
   Check,
   Kanban,
   BookOpen,
+  Download,
 } from 'lucide-react'
 import { AttachmentsList } from '@/components/shared/AttachmentsList'
 import { CommentsList } from '@/components/shared/CommentsList'
 import { TaskNotes } from '@/components/shared/TaskNotes'
+import { ExportMenu } from '@/components/shared/ExportMenu'
 import { toast } from '@/hooks/use-toast'
 
 type DrawerTask = {
@@ -91,6 +93,7 @@ export function TaskDrawer() {
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [isLoadingDetails, setIsLoadingDetails] = useState(false)
   const [isRefreshingAttachments, setIsRefreshingAttachments] = useState(false)
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
 
   const supabase = createClient()
 
@@ -330,12 +333,21 @@ export function TaskDrawer() {
                 </button>
               </div>
 
-              <button
-                onClick={closeDrawer}
-                className="p-1.5 rounded-lg text-slate-500 dark:text-slate-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsExportMenuOpen(true)}
+                  className="p-1.5 rounded-lg text-slate-500 dark:text-slate-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
+                  title="Export task"
+                >
+                  <Download size={18} />
+                </button>
+                <button
+                  onClick={closeDrawer}
+                  className="p-1.5 rounded-lg text-slate-500 dark:text-slate-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.05] transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Title */}
@@ -605,6 +617,16 @@ export function TaskDrawer() {
           </div>
         ) : null}
       </div>
+
+      {/* Export Menu Modal */}
+      {task && (
+        <ExportMenu
+          taskIds={[task.id]}
+          isOpen={isExportMenuOpen}
+          onClose={() => setIsExportMenuOpen(false)}
+          selectedCount={1}
+        />
+      )}
     </>
   )
 }
