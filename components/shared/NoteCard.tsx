@@ -1,14 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Loader2, Pin, Edit2, MoreVertical } from 'lucide-react'
+import { Trash2, Loader2, Pin, Edit2, MoreVertical, Archive } from 'lucide-react'
 import type { Note } from '@/stores/notesStore'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { archiveNote } from '@/lib/actions/notes'
+import { useToast } from '@/hooks/use-toast'
 
 interface NoteCardProps {
   note: Note
   onEdit?: (note: Note) => void
   onDelete?: (id: string) => void
+  onArchive?: (id: string) => void
   onTogglePin?: (id: string, pinned: boolean) => void
   isSelected?: boolean
 }
@@ -26,13 +29,16 @@ export function NoteCard({
   note,
   onEdit,
   onDelete,
+  onArchive,
   onTogglePin,
   isSelected = false,
 }: NoteCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
   const [isTogglingPin, setIsTogglingPin] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const { primary } = useThemeColor()
+  const { toast } = useToast()
 
   const colors = colorMap[note.color || 'blue'] || colorMap.blue
 
@@ -44,6 +50,25 @@ export function NoteCard({
       } finally {
         setIsDeleting(false)
       }
+    }
+  }
+
+  const handleArchive = async () => {
+    try {
+      setIsArchiving(true)
+      onArchive?.(note.id)
+      toast({
+        title: 'Success',
+        description: 'Note archived',
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to archive note',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsArchiving(false)
     }
   }
 
@@ -133,6 +158,15 @@ export function NoteCard({
             title="Edit note"
           >
             <Edit2 size={12} />
+          </button>
+
+          <button
+            onClick={handleArchive}
+            disabled={isArchiving}
+            className="p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition-colors"
+            title="Archive note"
+          >
+            {isArchiving ? <Loader2 size={12} className="animate-spin" /> : <Archive size={12} />}
           </button>
 
           <button

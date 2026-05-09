@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTasksWithAssignees } from '@/lib/queries/tasks'
+import { getKanbanColumns } from '@/lib/actions/kanban-columns'
 import { KanbanBoard } from '@/components/kanban/KanbanBoard'
 import { BoardRealtimeProvider } from '@/components/kanban/BoardRealtimeProvider'
 import { NewTaskButton } from '@/components/kanban/NewTaskButton'
@@ -46,6 +47,15 @@ export default async function BoardPage() {
   }
 
   const tasks = await getTasksWithAssignees(membership.workspace_id)
+  let columns = []
+  
+  try {
+    columns = await getKanbanColumns(membership.workspace_id)
+  } catch (error) {
+    console.error('[BoardPage] Failed to load kanban columns', error)
+    // Fallback to empty array - will use default columns in component
+  }
+  
   const taskCount = tasks.length
 
   return (
@@ -84,6 +94,7 @@ export default async function BoardPage() {
         <BoardRealtimeProvider workspaceId={membership.workspace_id}>
           <KanbanBoard
             initialTasks={tasks}
+            initialColumns={columns}
             workspaceId={membership.workspace_id}
           />
         </BoardRealtimeProvider>

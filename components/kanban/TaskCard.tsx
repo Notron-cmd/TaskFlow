@@ -5,13 +5,18 @@ import { useTaskStore } from '@/stores/taskStore'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useState } from 'react'
 import {
   CalendarClock,
   CalendarDays,
   GripVertical,
   Paperclip,
   MessageSquare,
+  Archive,
+  MoreVertical,
 } from 'lucide-react'
+import { archiveTask } from '@/lib/actions/tasks'
+import { useToast } from '@/hooks/use-toast'
 
 type Task = Database['public']['Tables']['tasks']['Row']
 
@@ -90,6 +95,9 @@ function formatDate(dateString: string): string {
 export default function TaskCard({ task, isDragging }: TaskCardProps) {
   const openDrawer = useTaskStore((state) => state.openDrawer)
   const { primary, accent } = useThemeColor()
+  const [showMenu, setShowMenu] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
+  const { toast } = useToast()
   
   // Setup sortable for drag and drop
   const {
@@ -100,6 +108,27 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
     transition,
     isDragging: isSortableDragging,
   } = useSortable({ id: task.id })
+
+  const handleArchive = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsArchiving(true)
+    try {
+      await archiveTask(task.id)
+      toast({
+        title: 'Success',
+        description: 'Task archived',
+      })
+      setShowMenu(false)
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to archive task',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsArchiving(false)
+    }
+  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -274,6 +303,34 @@ export default function TaskCard({ task, isDragging }: TaskCardProps) {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <GripVertical size={11} className="text-slate-400 dark:text-slate-700" />
+      </div>
+
+      {/* Action Menu */}
+      <div className="absolute right-7 md:right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowMenu(!showMenu)
+            }}
+            className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors"
+          >
+            <MoreVertical size={14} className="text-slate-600 dark:text-slate-400" />
+          </button>
+
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50 min-w-max">
+              <button
+                onClick={handleArchive}
+                disabled={isArchiving}
+                className="w-full text-left px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                <Archive size={14} />
+                {isArchiving ? 'Archiving...' : 'Archive'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

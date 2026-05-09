@@ -13,8 +13,10 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { useTaskStore } from '@/stores/taskStore'
-import { KanbanColumn } from '@/components/kanban/KanbanColumn'
+import { Settings2 } from 'lucide-react'
+import { useTaskStore, type KanbanColumn } from '@/stores/taskStore'
+import { KanbanColumn as KanbanColumnComponent } from '@/components/kanban/KanbanColumn'
+import { ColumnManagementModal } from '@/components/kanban/ColumnManagementModal'
 import TaskCard from '@/components/kanban/TaskCard'
 import { moveTask } from '@/lib/actions/tasks'
 import { Database } from '@/types/database.types'
@@ -23,29 +25,43 @@ type Task = Database['public']['Tables']['tasks']['Row']
 
 type KanbanBoardProps = {
   initialTasks: Task[]
+  initialColumns: any[]
   workspaceId: string
 }
 
-const COLUMNS: Array<{
-  id: 'todo' | 'in_progress' | 'done'
-  title: string
-}> = [
-  { id: 'todo', title: 'To Do' },
-  { id: 'in_progress', title: 'In Progress' },
-  { id: 'done', title: 'Done' },
-]
-
 export function KanbanBoard({
   initialTasks,
+  initialColumns,
   workspaceId,
 }: KanbanBoardProps) {
-  const { tasks, setTasks, moveTaskOptimistic } = useTaskStore()
+  const { tasks, columns, setTasks, setColumns, moveTaskOptimistic, openColumnModal, isColumnModalOpen, closeColumnModal } = useTaskStore()
   const [activeTask, setActiveTask] = useState<Task | null>(null)
-  const [activeTab, setActiveTab] = useState<'todo' | 'in_progress' | 'done'>('todo')
+  const [activeTab, setActiveTab] = useState<string>(initialColumns[0]?.status || 'todo')
 
   useEffect(() => {
     setTasks(initialTasks)
-  }, [initialTasks, setTasks])
+    
+    // If no columns provided, use default columns as fallback
+    if (!initialColumns || initialColumns.length === 0) {
+      console.warn('[KanbanBoard] No columns provided, using defaults', { 
+        initialColumnsLength: initialColumns?.length 
+      })
+      const defaultColumns = [
+        { id: '1', workspace_id: workspaceId, name: 'To Do', color: '#94A3B8', icon: 'circle', status: 'todo', position: 0, wip_limit: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        { id: '2', workspace_id: workspaceId, name: 'In Progress', color: '#F59E0B', icon: 'loader2', status: 'in_progress', position: 1, wip_limit: 5, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+        { id: '3', workspace_id: workspaceId, name: 'Done', color: '#14B8A6', icon: 'check-circle2', status: 'done', position: 2, wip_limit: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      ]
+      setColumns(defaultColumns)
+      setActiveTab('todo')
+    } else {
+      console.log('[KanbanBoard] Loaded columns from database', { 
+        count: initialColumns.length,
+        columns: initialColumns
+      })
+      setColumns(initialColumns)
+      setActiveTab(initialColumns[0]?.status || 'todo')
+    }
+  }, [initialTasks, initialColumns, setTasks, setColumns])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -78,10 +94,10 @@ export function KanbanBoard({
       return
     }
 
-    let newStatus: 'todo' | 'in_progress' | 'done' = activeTask.status
+    let newStatus: string = activeTask.status
 
-    if (COLUMNS.some((col) => col.id === over.id)) {
-      newStatus = over.id as 'todo' | 'in_progress' | 'done'
+    if (columns.some((col) => col.status === over.id)) {
+      newStatus = over.id as string
     } else {
       const overTask = tasks.find((t) => t.id === over.id)
       if (overTask) {
@@ -104,7 +120,7 @@ export function KanbanBoard({
     }
 
     setActiveTask(null)
-  }, [activeTask, tasks, moveTaskOptimistic])
+  }, [activeTask, tasks, columns, moveTaskOptimistic])
 
   const handleDragCancel = useCallback(() => {
     setActiveTask(null)
@@ -112,21 +128,32 @@ export function KanbanBoard({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Column Management Button - Top Right */}
+      <div className="absolute top-6 right-6 z-20">
+        <button
+          onClick={openColumnModal}
+          className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-700 dark:text-gray-300 transition-smooth"
+          title="Manage columns"
+        >
+          <Settings2 size={18} />
+        </button>
+      </div>
+
       {/* Tabs - visible on mobile, hidden on md+ */}
       <div className="md:hidden flex gap-1 mb-3 border-b border-gray-200 dark:border-white/[0.05] overflow-x-auto pb-2 sticky top-0 bg-white dark:bg-[#0F0F1A] z-10">
-        {COLUMNS.map((column) => {
-          const columnTasks = tasks.filter((t) => t.status === column.id)
+        {columns.map((column) => {
+          const columnTasks = tasks.filter((t) => t.status === column.status)
           return (
             <button
               key={column.id}
-              onClick={() => setActiveTab(column.id)}
+              onClick={() => setActiveTab(column.status)}
               className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-smooth border-b-2 flex items-center gap-1.5 ${
-                activeTab === column.id
+                activeTab === column.status
                   ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 animate-scale-in'
                   : 'border-transparent text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              {column.title}
+              {column.name}
               <span className="text-[10px] bg-gray-200 dark:bg-slate-700 px-1.5 py-0.5 rounded-full">
                 {columnTasks.length}
               </span>
@@ -137,7 +164,7 @@ export function KanbanBoard({
 
       {/* Kanban Container */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Desktop View - 3 columns */}
+        {/* Desktop View - Multiple columns */}
         <div className="hidden md:flex gap-4 md:gap-6 w-full overflow-x-auto pb-4 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
           <DndContext
             sensors={sensors}
@@ -146,18 +173,19 @@ export function KanbanBoard({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
           >
-            {COLUMNS.map((column) => {
+            {columns.map((column) => {
               const columnTasks = tasks
-                .filter((t) => t.status === column.id)
+                .filter((t) => t.status === column.status)
                 .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 
               return (
-                <KanbanColumn
+                <KanbanColumnComponent
                   key={column.id}
-                  id={column.id}
-                  title={column.title}
+                  id={column.status}
+                  title={column.name}
                   tasks={columnTasks}
-                  onAddTask={() => {}}
+                  columnColor={column.color}
+                  wipLimit={column.wip_limit || undefined}
                 />
               )
             })}
@@ -181,23 +209,24 @@ export function KanbanBoard({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
           >
-            {COLUMNS.map((column) => {
+            {columns.map((column) => {
               const columnTasks = tasks
-                .filter((t) => t.status === column.id)
+                .filter((t) => t.status === column.status)
                 .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 
               return (
                 <div
                   key={column.id}
                   className={`w-full flex-shrink-0 flex flex-col overflow-y-auto pb-4 transition-opacity duration-300 ${
-                    column.id === activeTab ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'
+                    column.status === activeTab ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'
                   }`}
                 >
-                  <KanbanColumn
-                    id={column.id}
-                    title={column.title}
+                  <KanbanColumnComponent
+                    id={column.status}
+                    title={column.name}
                     tasks={columnTasks}
-                    onAddTask={() => {}}
+                    columnColor={column.color}
+                    wipLimit={column.wip_limit || undefined}
                   />
                 </div>
               )
@@ -213,6 +242,15 @@ export function KanbanBoard({
           </DndContext>
         </div>
       </div>
+
+      {/* Column Management Modal */}
+      <ColumnManagementModal
+        workspaceId={workspaceId}
+        columns={columns}
+        isOpen={isColumnModalOpen}
+        onClose={closeColumnModal}
+        onColumnsUpdated={setColumns}
+      />
     </div>
   )
 }

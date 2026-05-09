@@ -17,6 +17,7 @@ export async function getTasksWithAssignees(workspaceId: string) {
       )`
     )
     .eq("workspace_id", workspaceId)
+    .eq("is_archived", false)
     .order("position", { ascending: true });
 
   if (error) {
@@ -84,6 +85,32 @@ export async function getTaskById(taskId: string) {
     )
     .eq("id", taskId)
     .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function getArchivedTasks(workspaceId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select(
+      `*,
+      task_assignees (
+        profiles (
+          id,
+          full_name,
+          avatar_url
+        )
+      )`
+    )
+    .eq("workspace_id", workspaceId)
+    .eq("is_archived", true)
+    .order("archived_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message);

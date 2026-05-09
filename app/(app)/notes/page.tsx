@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Search, Download, Loader2 } from 'lucide-react'
 import { useNotesStore, type Note } from '@/stores/notesStore'
-import { getNotes, createNote, updateNote, deleteNote, toggleNotePin, searchNotes } from '@/lib/actions/notes'
+import { getNotes, createNote, updateNote, deleteNote, toggleNotePin, searchNotes, archiveNote } from '@/lib/actions/notes'
 import { NoteCard } from '@/components/shared/NoteCard'
 import { NoteEditor } from '@/components/shared/NoteEditor'
 import { NotesExportMenu } from '@/components/shared/NotesExportMenu'
@@ -110,6 +110,23 @@ export default function NotesPage() {
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete note',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleArchiveNote = async (noteId: string) => {
+    try {
+      await archiveNote(noteId)
+      store.deleteNote(noteId)
+      toast({
+        title: 'Success',
+        description: 'Note archived',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to archive note',
         variant: 'destructive',
       })
     }
@@ -229,6 +246,7 @@ export default function NotesPage() {
                 note={note}
                 onEdit={handleEditNote}
                 onDelete={handleDeleteNote}
+                onArchive={handleArchiveNote}
                 onTogglePin={handleTogglePin}
               />
             ))}

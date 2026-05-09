@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronUp,
   FileText,
+  Archive,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { label: 'Board', href: '/board', icon: Kanban },
   { label: 'Calendar', href: '/calendar', icon: CalendarDays },
   { label: 'Notes', href: '/notes', icon: FileText },
+  { label: 'Archive', href: '/archive', icon: Archive },
   { label: 'Reminders', href: '/reminders', icon: Bell },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]

@@ -5,31 +5,51 @@ export type Task = Database["public"]["Tables"]["tasks"]["Row"];
 export type CalendarEvent =
   Database["public"]["Tables"]["calendar_events"]["Row"];
 
+export interface KanbanColumn {
+  id: string;
+  workspace_id: string;
+  name: string;
+  color: string;
+  icon: string;
+  status: string;
+  position: number;
+  wip_limit: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface TaskStoreState {
   tasks: Task[];
   events: CalendarEvent[];
+  columns: KanbanColumn[];
   activeTaskId: string | null;
   isDrawerOpen: boolean;
   isCreateModalOpen: boolean;
+  isColumnModalOpen: boolean;
   isLoading: boolean;
+  createTaskStatus: string | null;
 }
 
 interface TaskStoreActions {
   setTasks: (tasks: Task[]) => void;
   setEvents: (events: CalendarEvent[]) => void;
+  setColumns: (columns: KanbanColumn[]) => void;
   upsertTask: (task: Task) => void;
   removeTask: (taskId: string) => void;
   upsertEvent: (event: CalendarEvent) => void;
   removeEvent: (eventId: string) => void;
   moveTaskOptimistic: (
     taskId: string,
-    newStatus: "todo" | "in_progress" | "done",
+    newStatus: string,
     newPosition: number
   ) => void;
   openDrawer: (taskId: string) => void;
   closeDrawer: () => void;
   openCreateModal: () => void;
+  openCreateModalWithStatus: (status: string) => void;
   closeCreateModal: () => void;
+  openColumnModal: () => void;
+  closeColumnModal: () => void;
   setLoading: (loading: boolean) => void;
 }
 
@@ -37,14 +57,19 @@ export const useTaskStore = create<TaskStoreState & TaskStoreActions>(
   (set) => ({
     tasks: [],
     events: [],
+    columns: [],
     activeTaskId: null,
     isDrawerOpen: false,
     isCreateModalOpen: false,
+    isColumnModalOpen: false,
     isLoading: false,
+    createTaskStatus: null,
 
     setTasks: (tasks) => set({ tasks }),
 
     setEvents: (events) => set({ events }),
+
+    setColumns: (columns) => set({ columns }),
 
     upsertTask: (task) =>
       set((state) => {
@@ -104,9 +129,17 @@ export const useTaskStore = create<TaskStoreState & TaskStoreActions>(
         isDrawerOpen: false,
       }),
 
-    openCreateModal: () => set({ isCreateModalOpen: true }),
+    openCreateModal: () => set({ isCreateModalOpen: true, createTaskStatus: null }),
 
-    closeCreateModal: () => set({ isCreateModalOpen: false }),
+    openCreateModalWithStatus: (status) =>
+      set({ isCreateModalOpen: true, createTaskStatus: status }),
+
+    closeCreateModal: () =>
+      set({ isCreateModalOpen: false, createTaskStatus: null }),
+
+    openColumnModal: () => set({ isColumnModalOpen: true }),
+
+    closeColumnModal: () => set({ isColumnModalOpen: false }),
 
     setLoading: (loading) => set({ isLoading: loading }),
   })

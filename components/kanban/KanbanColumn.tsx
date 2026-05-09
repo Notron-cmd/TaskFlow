@@ -5,42 +5,18 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Database } from '@/types/database.types'
 import TaskCard from '@/components/kanban/TaskCard'
 import TaskCardSkeleton from '@/components/kanban/TaskCardSkeleton'
-import { Circle, Loader2, CheckCircle2, Plus, Inbox } from 'lucide-react'
+import { Circle, Plus, Inbox, Loader2 } from 'lucide-react'
+import { useTaskStore } from '@/stores/taskStore'
 
 type Task = Database['public']['Tables']['tasks']['Row']
 
 type KanbanColumnProps = {
-  id: 'todo' | 'in_progress' | 'done'
+  id: string
   title: string
   tasks: Task[]
   isLoading?: boolean
-  onAddTask?: () => void
-}
-
-type ColumnConfig = {
-  color: string
-  icon: typeof Circle
-  iconClass: string
+  columnColor?: string
   wipLimit?: number
-}
-
-const COLUMN_CONFIG: Record<KanbanColumnProps['id'], ColumnConfig> = {
-  todo: {
-    color: '#94A3B8',
-    icon: Circle,
-    iconClass: 'text-slate-400',
-  },
-  in_progress: {
-    color: '#F59E0B',
-    icon: Loader2,
-    iconClass: 'text-amber-400 animate-spin',
-    wipLimit: 5,
-  },
-  done: {
-    color: '#14B8A6',
-    icon: CheckCircle2,
-    iconClass: 'text-teal-400',
-  },
 }
 
 export function KanbanColumn({
@@ -48,30 +24,33 @@ export function KanbanColumn({
   title,
   tasks,
   isLoading = false,
-  onAddTask,
+  columnColor = '#94A3B8',
+  wipLimit = undefined,
 }: KanbanColumnProps) {
+  const { openCreateModalWithStatus } = useTaskStore()
   const { setNodeRef, isOver } = useDroppable({ id })
-  const config = COLUMN_CONFIG[id]
-  const Icon = config.icon
-  const wipLimit = config.wipLimit
   const taskCount = tasks.length
 
   return (
     <div ref={setNodeRef} className="w-full md:w-80 md:flex-shrink-0 flex flex-col px-2 md:px-0" style={{
-      animation: id === 'todo' ? 'slideInLeft 0.5s ease-out' : id === 'in_progress' ? 'slideInUp 0.5s ease-out 100ms both' : 'slideInRight 0.5s ease-out 200ms both'
+      animation: 'slideInUp 0.5s ease-out'
     }}>
       <div
         className="h-[2px] rounded-full mb-2 md:mb-3 w-full opacity-60 transition-smooth"
-        style={{ background: config.color }}
+        style={{ background: columnColor }}
       />
 
       <div className="flex items-center justify-between mb-2 md:mb-3">
         <div className="flex items-center gap-1.5 md:gap-2">
           <div
             className="w-2 h-2 rounded-full"
-            style={{ background: config.color }}
+            style={{ background: columnColor }}
           />
-          <Icon className={`size-3 md:size-3.5 ${config.iconClass}`} />
+          {id === 'in_progress' ? (
+            <Loader2 className="size-3 md:size-3.5 text-amber-400 animate-spin" />
+          ) : (
+            <Circle className="size-3 md:size-3.5 text-slate-400" />
+          )}
           <span className="font-display text-xs md:text-sm font-semibold text-white/80">
             {title}
           </span>
@@ -110,7 +89,7 @@ export function KanbanColumn({
             <p className="text-xs md:text-sm text-slate-600">No tasks yet</p>
             <p
               className="text-[11px] md:text-xs text-indigo-400/70 cursor-pointer hover:text-indigo-400 transition-colors"
-              onClick={() => onAddTask?.()}
+              onClick={() => openCreateModalWithStatus(id)}
             >
               Add your first task
             </p>
@@ -135,7 +114,7 @@ export function KanbanColumn({
       </div>
 
       <button
-        onClick={() => onAddTask?.()}
+        onClick={() => openCreateModalWithStatus(id)}
         className="mt-2 w-full rounded-xl py-2 border border-dashed border-white/[0.06] text-slate-600 hover:text-slate-400 hover:border-white/[0.12] flex items-center justify-center gap-2 text-xs transition-all duration-150"
       >
         <Plus size={12} />

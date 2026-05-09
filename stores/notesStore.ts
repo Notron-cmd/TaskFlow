@@ -87,13 +87,18 @@ export const useNotesStore = create<NotesStoreState & NotesStoreActions>()(
   )
 )
 
-export const useNotesList = (notes: Note[]) => {
+export const useNotesList = (notes: Note[], searchQuery: string = '') => {
   // Filter and sort notes based on search and category
   const filteredNotes = notes
     .filter((note) => {
+      if (!searchQuery.trim()) return true // Show all if no search query
+      
+      const query = searchQuery.toLowerCase()
       const matchesSearch =
-        note.title.toLowerCase().includes('') &&
-        note.content.toLowerCase().includes('')
+        note.title.toLowerCase().includes(query) ||
+        note.content.toLowerCase().includes(query) ||
+        note.category?.toLowerCase().includes(query) ||
+        note.tags?.some(tag => tag.toLowerCase().includes(query))
       return matchesSearch
     })
     .sort((a, b) => {

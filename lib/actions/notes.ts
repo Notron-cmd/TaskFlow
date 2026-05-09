@@ -52,7 +52,7 @@ export async function createNote(data: NoteInput): Promise<any> {
 }
 
 /**
- * Get all notes for current user
+ * Get all notes for current user (excluding archived)
  */
 export async function getNotes(): Promise<any[]> {
   const supabase = await createClient()
@@ -69,6 +69,7 @@ export async function getNotes(): Promise<any[]> {
     .from('notes')
     .select('*')
     .eq('user_id', user.id)
+    .eq('is_archived', false)
     .order('pinned', { ascending: false })
     .order('updated_at', { ascending: false })
 
@@ -184,4 +185,114 @@ export async function searchNotes(query: string): Promise<any[]> {
   }
 
   return notes || []
+}
+
+/**
+ * Get archived notes for current user
+ */
+export async function getArchivedNotes(): Promise<any[]> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const { data: notes, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('is_archived', true)
+    .order('archived_at', { ascending: false })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return notes || []
+}
+
+/**
+ * Archive a note (soft delete)
+ */
+export async function archiveNote(noteId: string): Promise<any> {
+  const supabase = await createClient()
+
+  const { data: note, error } = await supabase
+    .from('notes')
+    .update({
+      is_archived: true,
+      archived_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', noteId)
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/notes')
+  revalidatePath('/archive')
+  return note
+}
+
+/**
+ * Restore an archived note
+ */
+export async function restoreNote(noteId: string): Promise<any> {
+  const supabase = await createClient()
+
+  const { data: note, error } = await supabase
+    .from('notes')
+    .update({
+      is_archived: false,
+      archived_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', noteId)
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/notes')
+  revalidatePath('/archive')
+  return note
+}
+
+/**
+ * Permanently delete an archived note
+ */
+export async function permanentlyDeleteNote(noteId: string): Promise<void> {
+  const supabase = await createClient()
+
+  // Check if note is archived
+  const { data: note, error: fetchError } = await supabase
+    .from('notes')
+    .select('is_archived')
+    .eq('id', noteId)
+    .single()
+
+  if (fetchError) {
+    throw new Error(fetchError.message)
+  }
+
+  if (!note.is_archived) {
+    throw new Error('Can only permanently delete archived notes')
+  }
+
+  const { error } = await supabase.from('notes').delete().eq('id', noteId)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/archive')
 }

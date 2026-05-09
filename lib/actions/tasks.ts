@@ -191,3 +191,107 @@ export async function assignTask(
 
   revalidatePath('/board')
 }
+
+/**
+ * Archive a task (soft delete)
+ */
+export async function archiveTask(taskId: string): Promise<Task> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .update({
+      is_archived: true,
+      archived_at: new Date().toISOString(),
+    })
+    .eq('id', taskId)
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/board')
+  revalidatePath('/calendar')
+  return task
+}
+
+/**
+ * Restore an archived task
+ */
+export async function restoreTask(taskId: string): Promise<Task> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .update({
+      is_archived: false,
+      archived_at: null,
+    })
+    .eq('id', taskId)
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/board')
+  revalidatePath('/calendar')
+  return task
+}
+
+/**
+ * Permanently delete an archived task
+ */
+export async function permanentlyDeleteTask(taskId: string): Promise<void> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  // Check if task is archived
+  const { data: task, error: fetchError } = await supabase
+    .from('tasks')
+    .select('is_archived')
+    .eq('id', taskId)
+    .single()
+
+  if (fetchError) {
+    throw new Error(fetchError.message)
+  }
+
+  if (!task.is_archived) {
+    throw new Error('Can only permanently delete archived tasks')
+  }
+
+  const { error: deleteError } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', taskId)
+
+  if (deleteError) {
+    throw new Error(deleteError.message)
+  }
+
+  revalidatePath('/archive')
+}

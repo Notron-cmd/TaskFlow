@@ -19,7 +19,7 @@ const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
 ]
 
 export function CreateTaskModal() {
-  const { isCreateModalOpen, closeCreateModal, upsertTask } = useTaskStore()
+  const { isCreateModalOpen, closeCreateModal, upsertTask, createTaskStatus } = useTaskStore()
   const { primary, focus } = useThemeColor()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -88,7 +88,7 @@ export function CreateTaskModal() {
         title: title.trim(),
         description: description.trim() || undefined,
         priority,
-        status: 'todo',
+        status: createTaskStatus || 'todo',
         tags: [],
         position: 0,
         due_date: dueDateISO,
