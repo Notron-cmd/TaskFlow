@@ -13,6 +13,9 @@ import {
   addReminder,
   deleteReminder,
 } from '@/lib/actions/reminders'
+import {
+  updateTaskEstimate,
+} from '@/lib/actions/subtasks-and-timers'
 import { getTaskAttachments, getTaskComments } from '@/lib/actions/task-details'
 import { getTaskNotes } from '@/lib/actions/task-notes'
 import { formatUtcForDatetimeLocal } from '@/lib/utils/datetime'
@@ -33,11 +36,16 @@ import {
   Kanban,
   BookOpen,
   Download,
+  Clock,
+  ListTodo,
 } from 'lucide-react'
 import { AttachmentsList } from '@/components/shared/AttachmentsList'
 import { CommentsList } from '@/components/shared/CommentsList'
 import { TaskNotes } from '@/components/shared/TaskNotes'
 import { ExportMenu } from '@/components/shared/ExportMenu'
+import { SubtaskManager } from '@/components/shared/SubtaskManager'
+import { TimerWidget } from '@/components/shared/TimerWidget'
+import { TimeTrackingPanel } from '@/components/shared/TimeTrackingPanel'
 import { toast } from '@/hooks/use-toast'
 
 type DrawerTask = {
@@ -51,6 +59,8 @@ type DrawerTask = {
   calendar_event_id: string | null
   attachment_count: number
   comment_count: number
+  estimated_hours?: number | null
+  total_time_spent_minutes?: number | null
   task_assignees?: {
     profiles: {
       id: string
@@ -94,6 +104,8 @@ export function TaskDrawer() {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false)
   const [isRefreshingAttachments, setIsRefreshingAttachments] = useState(false)
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
+  const [estimatedHours, setEstimatedHours] = useState<number>(0)
+  const [editingEstimate, setEditingEstimate] = useState(false)
 
   const supabase = createClient()
 
@@ -129,6 +141,7 @@ export function TaskDrawer() {
         setTask(data as DrawerTask)
         setTitle(data.title)
         setDescription(data.description || '')
+        setEstimatedHours(data.estimated_hours || 0)
         setHasChanges(false)
       }
       setIsLoading(false)
@@ -192,6 +205,12 @@ export function TaskDrawer() {
     if (!task) return
     setIsSaving(true)
     await updateTask(task.id, { title, description })
+    
+    // Save estimated hours if changed
+    if (estimatedHours > 0) {
+      await updateTaskEstimate(task.id, estimatedHours)
+    }
+    
     setIsSaving(false)
     setHasChanges(false)
     setShowSaved(true)
@@ -528,6 +547,58 @@ export function TaskDrawer() {
                   onAttachmentChanged={handleAttachmentChanged}
                 />
               )}
+            </div>
+
+            {/* Subtasks */}
+            <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-4 mb-4">
+              <SubtaskManager taskId={task?.id || ''} />
+            </div>
+
+            {/* Timer & Time Tracking */}
+            <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} style={{ color: primary }} />
+                  <span className="font-display text-sm font-semibold text-black dark:text-white/80">
+                    Time Estimate
+                  </span>
+                </div>
+                {editingEstimate && (
+                  <span className="text-xs text-slate-500">Click outside to save</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 mb-4">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={estimatedHours}
+                  onChange={(e) => {
+                    setEstimatedHours(Math.max(0, parseFloat(e.target.value) || 0))
+                    setHasChanges(true)
+                    setEditingEstimate(true)
+                  }}
+                  onBlur={() => setEditingEstimate(false)}
+                  className="w-20 px-3 py-2 bg-white dark:bg-[#252540] border border-gray-200 dark:border-white/[0.08] rounded-lg text-sm text-black dark:text-white outline-none focus:border-white/20"
+                  style={{
+                    borderColor: editingEstimate ? primary : undefined,
+                  }}
+                  placeholder="0"
+                />
+                <span className="text-sm text-slate-600 dark:text-slate-400">hours</span>
+              </div>
+
+              <TimerWidget taskId={task?.id || ''} />
+            </div>
+
+            {/* Time Tracking Panel */}
+            <div className="bg-gray-100 dark:bg-[#1E1E35] rounded-xl p-4 mb-4">
+              <TimeTrackingPanel 
+                taskId={task?.id || ''}
+                estimatedHours={estimatedHours}
+                onEstimateChange={setEstimatedHours}
+              />
             </div>
 
             {/* Notes */}
