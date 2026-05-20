@@ -2,11 +2,26 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '@/lib/utils/rate-limit'
 
 // ============ SUBTASKS ============
 
 export async function getSubtasks(taskId: string) {
   const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  // ✅ Rate limit: 1000 reads per minute per user
+  if (!checkRateLimit(user.id, 'get_subtasks', RATE_LIMIT_PRESETS.READ.maxRequests, RATE_LIMIT_PRESETS.READ.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
 
   const { data, error } = await supabase
     .from('task_subtasks')
@@ -30,6 +45,20 @@ export async function createSubtask(
   }
 ) {
   const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  // ✅ Rate limit: 100 writes per minute per user
+  if (!checkRateLimit(user.id, 'create_subtask', RATE_LIMIT_PRESETS.WRITE.maxRequests, RATE_LIMIT_PRESETS.WRITE.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
 
   // Get max position
   const { data: existing } = await supabase
@@ -91,6 +120,20 @@ export async function updateSubtask(
 
 export async function deleteSubtask(subtaskId: string) {
   const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  // ✅ Rate limit: 100 writes per minute per user
+  if (!checkRateLimit(user.id, 'delete_subtask', RATE_LIMIT_PRESETS.WRITE.maxRequests, RATE_LIMIT_PRESETS.WRITE.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
 
   const { error } = await supabase
     .from('task_subtasks')
@@ -168,6 +211,11 @@ export async function createTimeLog(
     throw new Error('User not authenticated')
   }
 
+  // ✅ Rate limit: 100 writes per minute per user
+  if (!checkRateLimit(user.id, 'create_time_log', RATE_LIMIT_PRESETS.WRITE.maxRequests, RATE_LIMIT_PRESETS.WRITE.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
+
   const now = new Date()
   const startedAt = new Date(now.getTime() - data.durationMinutes * 60000)
 
@@ -210,6 +258,20 @@ export async function createTimeLog(
 export async function getTimeLogs(taskId: string) {
   const supabase = await createClient()
 
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  // ✅ Rate limit: 1000 reads per minute per user
+  if (!checkRateLimit(user.id, 'get_time_logs', RATE_LIMIT_PRESETS.READ.maxRequests, RATE_LIMIT_PRESETS.READ.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
+
   const { data, error } = await supabase
     .from('task_time_logs')
     .select('*, profiles(id, full_name, avatar_url)')
@@ -226,6 +288,20 @@ export async function getTimeLogs(taskId: string) {
 
 export async function deleteTimeLog(logId: string, durationMinutes: number) {
   const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  // ✅ Rate limit: 100 writes per minute per user
+  if (!checkRateLimit(user.id, 'delete_time_log', RATE_LIMIT_PRESETS.WRITE.maxRequests, RATE_LIMIT_PRESETS.WRITE.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
 
   // Get the task_id from the log
   const { data: log } = await supabase
@@ -266,6 +342,21 @@ export async function deleteTimeLog(logId: string, durationMinutes: number) {
 }
 
 export async function updateTaskEstimate(taskId: string, estimatedHours: number) {
+  const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  // ✅ Rate limit: 100 writes per minute per user
+  if (!checkRateLimit(user.id, 'update_estimate', RATE_LIMIT_PRESETS.WRITE.maxRequests, RATE_LIMIT_PRESETS.WRITE.windowMs)) {
+    throw new Error('Too many requests. Please try again later.')
+  }
   const supabase = await createClient()
 
   const { data: task, error } = await supabase
