@@ -10,7 +10,7 @@ export async function uploadAttachment(
   taskId: string,
   fileName: string,
   fileType: string,
-  fileData: number[]
+  fileData: string
 ): Promise<TaskAttachment> {
   const supabase = await createClient()
   const {
@@ -21,9 +21,13 @@ export async function uploadAttachment(
     throw new Error('Unauthorized')
   }
 
-  // Convert array back to Uint8Array
-  const uint8Array = new Uint8Array(fileData)
-  const fileSize = uint8Array.byteLength
+  // Decode base64 string to binary
+  const binaryString = atob(fileData)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  const fileSize = bytes.byteLength
 
   // Validate file size (max 5MB)
   const maxSize = 5 * 1024 * 1024
@@ -34,8 +38,8 @@ export async function uploadAttachment(
   const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
   const storagePath = `${user.id}/${taskId}/${Date.now()}-${sanitizedName}`
 
-  // Create Blob from Uint8Array
-  const blob = new Blob([uint8Array], { type: fileType })
+  // Create Blob from bytes
+  const blob = new Blob([bytes], { type: fileType })
 
   const { error: uploadError } = await supabase.storage
     .from('attachments')

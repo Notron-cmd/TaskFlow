@@ -357,7 +357,6 @@ export async function updateTaskEstimate(taskId: string, estimatedHours: number)
   if (!checkRateLimit(user.id, 'update_estimate', RATE_LIMIT_PRESETS.WRITE.maxRequests, RATE_LIMIT_PRESETS.WRITE.windowMs)) {
     throw new Error('Too many requests. Please try again later.')
   }
-  const supabase = await createClient()
 
   const { data: task, error } = await supabase
     .from('tasks')

@@ -5,7 +5,10 @@ import { Sun, Moon, Bell, Clock, Eye, Zap, RotateCcw } from 'lucide-react'
 import { ColorPicker } from '@/components/settings/ColorPicker'
 import { DebugThemeColor } from '@/components/debug/ThemeColorDebug'
 import { ThemeColorTest } from '@/components/debug/ThemeColorTest'
+import { AutomationRulesManager } from '@/components/settings/AutomationRulesManager'
 import { useThemeColor } from '@/hooks/useThemeColor'
+import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
 
 interface SettingSectionProps {
   title: string
@@ -133,6 +136,27 @@ export default function SettingsPage() {
   } = useSettingsStore()
 
   const { primary, accent } = useThemeColor()
+  const [workspaceId, setWorkspaceId] = useState<string>('')
+
+  // Get workspace ID
+  useEffect(() => {
+    const getWorkspace = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: membership } = await supabase
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (membership) {
+        setWorkspaceId(membership.workspace_id)
+      }
+    }
+    getWorkspace()
+  }, [])
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
@@ -250,6 +274,13 @@ export default function SettingsPage() {
           </button>
         </SettingSection>
       </div>
+
+      {/* Automation Rules Section */}
+      {workspaceId && (
+        <div className="mt-8 bg-gray-100 dark:bg-slate-800/50 border border-gray-300 dark:border-slate-700 rounded-xl p-6 animate-scale-in">
+          <AutomationRulesManager workspaceId={workspaceId} />
+        </div>
+      )}
 
       {/* Footer Info */}
       <div className="mt-8 p-4 rounded-lg bg-gray-200 dark:bg-slate-900/30 border border-gray-300 dark:border-slate-700">

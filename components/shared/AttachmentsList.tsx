@@ -72,13 +72,14 @@ export function AttachmentsList({ taskId, attachments, onAttachmentDeleted, onAt
         throw new Error('File size must be less than 5MB')
       }
 
-      // Read file as ArrayBuffer
+      // Read file as base64 (much more efficient than number array)
       const arrayBuffer = await file.arrayBuffer()
       const uint8Array = new Uint8Array(arrayBuffer)
-      const fileDataArray = Array.from(uint8Array)
+      const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array) as any)
+      const base64String = btoa(binaryString)
 
       const { uploadAttachment } = await import('@/lib/actions/attachments')
-      await uploadAttachment(taskId, file.name, file.type, fileDataArray)
+      await uploadAttachment(taskId, file.name, file.type, base64String)
       
       toast({
         title: 'Success',

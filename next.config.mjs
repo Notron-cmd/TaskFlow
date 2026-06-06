@@ -7,9 +7,9 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     unoptimized: false,
   },
-  // Server actions
+  // Server actions - Increased to 50MB for file uploads with base64 encoding
   serverActions: {
-    bodySizeLimit: '5mb',
+    bodySizeLimit: '50mb',
   },
   // Compression
   compress: true,

@@ -96,9 +96,13 @@ export function SubtaskManager({ taskId, compact = false }: SubtaskManagerProps)
   const [newTitle, setNewTitle] = useState('')
   const [expanded, setExpanded] = useState(!compact)
 
-  const { subtasks, getSubtasksByTaskId, setSubtasks, toggleSubtask } = useSubtaskStore()
-  const taskSubtasks = getSubtasksByTaskId(taskId)
-  const { completed, total, percentage } = useSubtaskStore().getProgress(taskId)
+  // Subscribe to subtasks for this specific task - use selector to prevent infinite loops
+  const taskSubtasks = useSubtaskStore((state) => state.subtasks[taskId] || [])
+  const { setSubtasks, toggleSubtask, getProgress } = useSubtaskStore()
+  
+  // Compute sorted subtasks and progress - will update when taskSubtasks changes
+  const sortedSubtasks = taskSubtasks.sort((a, b) => a.position - b.position)
+  const { completed, total, percentage } = getProgress(taskId)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -169,7 +173,7 @@ export function SubtaskManager({ taskId, compact = false }: SubtaskManagerProps)
 
   const handleToggleSubtask = async (subtaskId: string) => {
     try {
-      const subtask = taskSubtasks.find((s) => s.id === subtaskId)
+      const subtask = sortedSubtasks.find((s) => s.id === subtaskId)
       if (!subtask) return
 
       await toggleSubtaskComplete(subtaskId, !subtask.completed)
@@ -195,10 +199,10 @@ export function SubtaskManager({ taskId, compact = false }: SubtaskManagerProps)
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = taskSubtasks.findIndex((s) => s.id === active.id)
-      const newIndex = taskSubtasks.findIndex((s) => s.id === over.id)
+      const oldIndex = sortedSubtasks.findIndex((s) => s.id === active.id)
+      const newIndex = sortedSubtasks.findIndex((s) => s.id === over.id)
 
-      const newOrder = arrayMove(taskSubtasks, oldIndex, newIndex)
+      const newOrder = arrayMove(sortedSubtasks, oldIndex, newIndex)
       useSubtaskStore().reorderSubtasks(taskId, newOrder)
 
       try {
@@ -249,18 +253,18 @@ export function SubtaskManager({ taskId, compact = false }: SubtaskManagerProps)
       {expanded && (
         <div className="space-y-2">
           {/* Subtasks List */}
-          {taskSubtasks.length > 0 && (
+          {sortedSubtasks.length > 0 && (
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={taskSubtasks.map((s) => s.id)}
+                items={sortedSubtasks.map((s) => s.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-2">
-                  {taskSubtasks.map((subtask) => (
+                  {sortedSubtasks.map((subtask) => (
                     <SubtaskItem
                       key={subtask.id}
                       subtask={subtask}
